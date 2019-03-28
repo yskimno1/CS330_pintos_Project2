@@ -43,8 +43,8 @@ process_execute (const char *file_name)
 
   char* filename_copy = (char *)malloc(strlen(file_name)+1);
   strlcpy(filename_copy, file_name, strlen(file_name)+1);
-  char** saveptr;
-  char* func_name = strtok_r(filename_copy, " ", saveptr);
+  char* saveptr;
+  char* func_name = strtok_r(filename_copy, " ", &saveptr);
 
   /* Create a new thread to execute FUNC_NAME. */
   tid = thread_create (func_name, PRI_DEFAULT, start_process, fn_copy);
@@ -234,18 +234,18 @@ load (const char *file_name, void (**eip) (void), void **esp)
   process_activate ();
 
   char* arg;
-  char** saveptr;
+  char* saveptr;
   int argc = 0;
   void** argv[ARGV_MAX_SIZE];
   memset(argv, NULL, sizeof(argv));
 
   char* filename_args = (char *)malloc(strlen(file_name)+1);
   strlcpy(filename_args, file_name, strlen(file_name)+1);
-  arg = strtok_r(filename_args, " ", saveptr);
+  arg = strtok_r(filename_args, " ", &saveptr);
   while(arg){
     argv[argc] = arg;
     argc++;
-    arg = strtok_r(NULL, " ", saveptr);
+    arg = strtok_r(NULL, " ", &saveptr);
   }
   if(argc != 0){
     char argv_end = 0;
@@ -486,17 +486,17 @@ setup_stack (void **esp, int argc, void** argv)
             *esp = *esp - (strlen(argv[i])+1);
             memcpy(*esp, argv[i], strlen(argv[i])+1);
           }
-          char** p_argv = *esp;
-          *esp = *esp - sizeof(char** );
-          memcpy(*esp, p_argv, sizeof(char **));
-
-          *esp = *esp - sizeof(int);
-          memcpy(*esp, &argc, sizeof(int));
-
-          void* return_addr = 0;
-          *esp = *esp - sizeof(void* );
-          memcpy(*esp, &return_addr, sizeof(void*));
         }
+        char** p_argv = *esp;
+        *esp = *esp - sizeof(char** );
+        memcpy(*esp, p_argv, sizeof(char **));
+
+        *esp = *esp - sizeof(int);
+        memcpy(*esp, &argc, sizeof(int));
+
+        void* return_addr = 0;
+        *esp = *esp - sizeof(void* );
+        memcpy(*esp, &return_addr, sizeof(void*));
       }
       else
         palloc_free_page (kpage);
