@@ -247,10 +247,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
     argc++;
     arg = strtok_r(NULL, " ", &saveptr);
   }
-  if(argc != 0){
-    char argv_end = 0;
-    memset(argv[argc+1], &argv_end, sizeof(char));
-  }
   /* at this point, we have to do parsing kys1 */
   /* Open executable file. */
   file = filesys_open (argv[0]);
@@ -486,12 +482,15 @@ setup_stack (void **esp, int argc, void** argv)
           uint8_t temp = 0;
           memcpy(*esp, &temp , sizeof(uint8_t));
         }
+        char* zero = 0;
+        *esp = *esp - sizeof(char* );
+        memcpy(*esp, &zero, sizeof(char* ));
 
-        for(i=argc; i>=0; i--){ /* one more push */
+        for(i=argc-1; i>=0; i--){ /* one more push */
           *esp = *esp - (strlen(argv[i])+1);
           memcpy(*esp, argv[i], strlen(argv[i])+1);
         }
-
+        
         char** p_argv = *esp;
         *esp = *esp - sizeof(char** );
         memcpy(*esp, p_argv, sizeof(char **));
