@@ -37,7 +37,7 @@ process_execute (const char *file_name)
   if (fn_copy == NULL)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
-
+  /* strtok_r(fn_copy), push? */
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
@@ -115,7 +115,9 @@ process_exit (void)
       curr->pagedir = NULL;
       pagedir_activate (NULL);
       pagedir_destroy (pd);
+      /* print message, kys0 */
     }
+  
 }
 
 /* Sets up the CPU for running user code in the current
@@ -222,7 +224,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   if (t->pagedir == NULL) 
     goto done;
   process_activate ();
-
+  /* at this point, we have to do parsing kys1 */
   /* Open executable file. */
   file = filesys_open (file_name);
   if (file == NULL) 
@@ -280,6 +282,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
               uint32_t read_bytes, zero_bytes;
               if (phdr.p_filesz > 0)
                 {
+                  
                   /* Normal segment.
                      Read initial part from disk and zero the rest. */
                   read_bytes = page_offset + phdr.p_filesz;
@@ -311,6 +314,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   *eip = (void (*) (void)) ehdr.e_entry;
 
   success = true;
+  /* file_deny_write? kys3 */
 
  done:
   /* We arrive here whether the load is successful or not. */
@@ -439,7 +443,7 @@ setup_stack (void **esp)
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)
-        *esp = PHYS_BASE;
+        *esp = PHYS_BASE-12;
       else
         palloc_free_page (kpage);
     }
