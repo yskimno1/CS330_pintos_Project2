@@ -253,10 +253,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
   }
   /* at this point, we have to do parsing kys1 */
   /* Open executable file. */
-  file = filesys_open (file_name);
+  file = filesys_open (argv[0]);
   if (file == NULL) 
     {
-      printf ("load: %s: open failed\n", file_name);
+      printf ("load: %s: open failed\n", argv[0]);
       goto done; 
     }
 
@@ -269,7 +269,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       || ehdr.e_phentsize != sizeof (struct Elf32_Phdr)
       || ehdr.e_phnum > 1024) 
     {
-      printf ("load: %s: error loading executable\n", file_name);
+      printf ("load: %s: error loading executable\n", argv[0]);
       goto done; 
     }
 
@@ -472,24 +472,26 @@ setup_stack (void **esp, int argc, void** argv)
       if(success){
 
         *esp = PHYS_BASE;
-        
+
         int i;
         if(argc != 0){
           for(i=argc-1; i>=0; i--){
             *esp = *esp - (strlen(argv[i])+1); // asdf
             memcpy(*esp, argv[i], strlen(argv[i])+1);
           }
-          /* word-align value */
-          while((int) *esp%4 != 0){
-            *esp = *esp - sizeof(uint8_t);
-            uint8_t temp = 0;
-            memcpy(*esp, &temp , sizeof(uint8_t));
-          }
-          for(i=argc; i>=0; i--){ /* one more push */
-            *esp = *esp - (strlen(argv[i])+1);
-            memcpy(*esp, argv[i], strlen(argv[i])+1);
-          }
         }
+          /* word-align value */
+        while((int) *esp%4 != 0){
+          *esp = *esp - sizeof(uint8_t);
+          uint8_t temp = 0;
+          memcpy(*esp, &temp , sizeof(uint8_t));
+        }
+
+        for(i=argc; i>=0; i--){ /* one more push */
+          *esp = *esp - (strlen(argv[i])+1);
+          memcpy(*esp, argv[i], strlen(argv[i])+1);
+        }
+
         char** p_argv = *esp;
         *esp = *esp - sizeof(char** );
         memcpy(*esp, p_argv, sizeof(char **));
