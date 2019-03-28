@@ -468,12 +468,14 @@ setup_stack (void **esp, int argc, void** argv)
       if(success){
 
         *esp = PHYS_BASE;
+        char* pargv[argc];
 
         int i;
         if(argc != 0){
           for(i=argc-1; i>=0; i--){
             *esp = *esp - (strlen(argv[i])+1); // asdf
             memcpy(*esp, argv[i], strlen(argv[i])+1);
+            pargv[i] = *esp;
           }
         }
           /* word-align value */
@@ -488,7 +490,7 @@ setup_stack (void **esp, int argc, void** argv)
 
         for(i=argc-1; i>=0; i--){ /* one more push */
           *esp = *esp - (sizeof(char* ));
-          memcpy(*esp, &argv[i], sizeof(char* ));
+          memcpy(*esp, &pargv[i], sizeof(char* ));
         }
         
         char** p_argv = *esp;
