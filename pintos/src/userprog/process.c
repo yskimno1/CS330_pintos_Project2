@@ -46,6 +46,7 @@ process_execute (const char *file_name)
   char* saveptr;
   char* func_name = strtok_r(filename_copy, " ", &saveptr);
 
+  free(func_name);
   /* Create a new thread to execute FUNC_NAME. */
   tid = thread_create (func_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
@@ -98,6 +99,7 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
+  while(1)
   return -1;
 }
 
@@ -341,6 +343,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
  done:
   /* We arrive here whether the load is successful or not. */
+  free(filename_args);
   file_close (file);
   return success;
 }
