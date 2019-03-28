@@ -487,8 +487,8 @@ setup_stack (void **esp, int argc, void** argv)
         memcpy(*esp, &zero, sizeof(char* ));
 
         for(i=argc-1; i>=0; i--){ /* one more push */
-          *esp = *esp - (strlen(argv[i])+1);
-          memcpy(*esp, argv[i], strlen(argv[i])+1);
+          *esp = *esp - (sizeof(char* ));
+          memcpy(*esp, &argv[i], sizeof(char* ));
         }
         
         char** p_argv = *esp;
