@@ -469,39 +469,39 @@ setup_stack (void **esp, int argc, void** argv)
 
         *esp = PHYS_BASE;
         char* pargv[argc];
-
         int i;
-        if(argc != 0){
-          for(i=argc-1; i>=0; i--){
-            *esp = *esp - (strlen(argv[i])+1); // asdf
-            memcpy(*esp, argv[i], strlen(argv[i])+1);
-            pargv[i] = *esp;
-          }
+        
+        //pargv[argc+1] = 0;
+        for(i=argc-1; i>=0; i--){
+          *esp = (char *)*esp - (strlen(argv[i])+1); // asdf
+          memcpy(*esp, argv[i], strlen(argv[i])+1);
+          pargv[i] = (char *) *esp;
         }
+        
           /* word-align value */
         while((int) *esp%4 != 0){
-          *esp = *esp - sizeof(uint8_t);
+          *esp = (char *) *esp - sizeof(uint8_t);
           uint8_t temp = 0;
           memcpy(*esp, &temp , sizeof(uint8_t));
         }
         char* zero = 0;
-        *esp = *esp - sizeof(char* );
+        *esp = (char *) *esp - sizeof(char* );
         memcpy(*esp, &zero, sizeof(char* ));
 
-        for(i=argc-1; i>=0; i--){ /* one more push */
-          *esp = *esp - (sizeof(char* ));
+        for(i=argc; i>=0; i--){ /* one more push */
+          *esp =(char *) *esp - (sizeof(char* ));
           memcpy(*esp, &pargv[i], sizeof(char* ));
         }
         
         char** p_argv = *esp;
-        *esp = *esp - sizeof(char** );
+        *esp = (char *)*esp - sizeof(char** );
         memcpy(*esp, p_argv, sizeof(char **));
 
-        *esp = *esp - sizeof(int);
+        *esp = (char *) *esp - sizeof(int);
         memcpy(*esp, &argc, sizeof(int));
 
         void* return_addr = 0;
-        *esp = *esp - sizeof(void* );
+        *esp = (char *) *esp - sizeof(void* );
         memcpy(*esp, &return_addr, sizeof(void*));
       }
       else
