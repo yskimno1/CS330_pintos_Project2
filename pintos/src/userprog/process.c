@@ -18,6 +18,8 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 
+#define ARGV_MAX_SIZE 128
+
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 
@@ -37,9 +39,15 @@ process_execute (const char *file_name)
   if (fn_copy == NULL)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
-  /* strtok_r(fn_copy), push? */
-  /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+
+
+  char* filename_copy = (char *)malloc(strlen(file_name)+1);
+  strlcpy(filename_copy, file_name, strlen(file_name)+1);
+  char** saveptr;
+  char* func_name = strtok_r(filename_copy, " ", saveptr);
+
+  /* Create a new thread to execute FUNC_NAME. */
+  tid = thread_create (func_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
   return tid;
@@ -199,7 +207,7 @@ struct Elf32_Phdr
 #define PF_W 2          /* Writable. */
 #define PF_R 4          /* Readable. */
 
-static bool setup_stack (void **esp);
+static bool setup_stack (void **esp, int argc, void** argv);
 static bool validate_segment (const struct Elf32_Phdr *, struct file *);
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
                           uint32_t read_bytes, uint32_t zero_bytes,
@@ -224,6 +232,25 @@ load (const char *file_name, void (**eip) (void), void **esp)
   if (t->pagedir == NULL) 
     goto done;
   process_activate ();
+
+  char* arg;
+  char** saveptr;
+  int argc = 0;
+  void** argv[ARGV_MAX_SIZE];
+  memset(argv, NULL, sizeof(argv));
+
+  char* filename_args = (char *)malloc(strlen(file_name)+1);
+  strlcpy(filename_args, file_name, strlen(file_name)+1);
+  arg = strtok_r(filename_args, " ", saveptr);
+  while(arg){
+    argv[argc] = arg;
+    argc++;
+    arg = strtok_r(NULL, " ", saveptr);
+  }
+  if(argc != 0){
+    char argv_end = 0;
+    memset(argv[argc+1], &argv_end, sizeof(char));
+  }
   /* at this point, we have to do parsing kys1 */
   /* Open executable file. */
   file = filesys_open (file_name);
@@ -307,7 +334,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
     }
 
   /* Set up stack. */
-  if (!setup_stack (esp))
+  if (!setup_stack (esp, argc, argv))
     goto done;
 
   /* Start address. */
@@ -433,7 +460,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
-setup_stack (void **esp) 
+setup_stack (void **esp, int argc, void** argv) 
 {
   uint8_t *kpage;
   bool success = false;
@@ -442,8 +469,35 @@ setup_stack (void **esp)
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
-      if (success)
-        *esp = PHYS_BASE-12;
+      if(success){
+
+        int i;
+        if(argc != 0){
+          for(i=argc-1; i>=0; i--){
+            *esp = *esp - (strlen(argv[i])+1); // asdf
+            memcpy(*esp, argv[i], strlen(argv[i])+1);
+          }
+          /* word-align value */
+          *esp = *esp - sizeof(uint8_t);
+          uint8_t temp = 0;
+          memcpy(*esp, &temp , sizeof(uint8_t));
+
+          for(i=argc; i>=0; i--){ /* one more push */
+            *esp = *esp - (strlen(argv[i])+1);
+            memcpy(*esp, argv[i], strlen(argv[i])+1);
+          }
+          char** p_argv = *esp;
+          *esp = *esp - sizeof(char** );
+          memcpy(*esp, p_argv, sizeof(char **));
+
+          *esp = *esp - sizeof(int);
+          memcpy(*esp, &argc, sizeof(int));
+
+          void* return_addr = 0;
+          *esp = *esp - sizeof(void* );
+          memcpy(*esp, &return_addr, sizeof(void*));
+        }
+      }
       else
         palloc_free_page (kpage);
     }
