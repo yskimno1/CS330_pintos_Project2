@@ -478,10 +478,11 @@ setup_stack (void **esp, int argc, void** argv)
             memcpy(*esp, argv[i], strlen(argv[i])+1);
           }
           /* word-align value */
-          *esp = *esp - sizeof(uint8_t);
-          uint8_t temp = 0;
-          memcpy(*esp, &temp , sizeof(uint8_t));
-
+          while((int) *esp%4 != 0){
+            *esp = *esp - sizeof(uint8_t);
+            uint8_t temp = 0;
+            memcpy(*esp, &temp , sizeof(uint8_t));
+          }
           for(i=argc; i>=0; i--){ /* one more push */
             *esp = *esp - (strlen(argv[i])+1);
             memcpy(*esp, argv[i], strlen(argv[i])+1);
