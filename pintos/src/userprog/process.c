@@ -40,15 +40,15 @@ process_execute (const char *file_name)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
 
-
   char* filename_copy = (char *)malloc(strlen(file_name)+1);
   strlcpy(filename_copy, file_name, strlen(file_name)+1);
   char* saveptr;
   char* func_name = strtok_r(filename_copy, " ", &saveptr);
 
-  free(func_name);
   /* Create a new thread to execute FUNC_NAME. */
   tid = thread_create (func_name, PRI_DEFAULT, start_process, fn_copy);
+
+  free(filename_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
   return tid;
@@ -99,7 +99,6 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
-  while(1)
   return -1;
 }
 
@@ -469,42 +468,44 @@ setup_stack (void **esp, int argc, void** argv)
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if(success){
-
         *esp = PHYS_BASE;
+        /* Implementation start */
+        /* copy the pointer of argv */
+        
         char* pargv[argc];
         int i;
-        
-        //pargv[argc+1] = 0;
         for(i=argc-1; i>=0; i--){
-          *esp = (char *)*esp - (strlen(argv[i])+1); // asdf
-          memcpy(*esp, argv[i], strlen(argv[i])+1);
-          pargv[i] = (char *) *esp;
+          size_t argv_len = strlen(argv[i]);
+          *esp = *esp - (argv_len+1); // asdf
+          memcpy(*esp, argv[i], argv_len+1);
+          pargv[i] = *esp;
         }
         
-          /* word-align value */
+        /* word-align value */
         while((int) *esp%4 != 0){
-          *esp = (char *) *esp - sizeof(uint8_t);
+          *esp = *esp - sizeof(uint8_t);
           uint8_t temp = 0;
           memcpy(*esp, &temp , sizeof(uint8_t));
         }
-        char* zero = 0;
-        *esp = (char *) *esp - sizeof(char* );
-        memcpy(*esp, &zero, sizeof(char* ));
 
+        /* argv */
+        char* zero = 0;
+        *esp = *esp - sizeof(char* );
+        memcpy(*esp, &zero, sizeof(char* ));
         for(i=argc; i>=0; i--){ /* one more push */
-          *esp =(char *) *esp - (sizeof(char* ));
+          *esp = *esp - (sizeof(char* ));
           memcpy(*esp, &pargv[i], sizeof(char* ));
         }
         
         char** p_argv = *esp;
-        *esp = (char *)*esp - sizeof(char** );
+        *esp = *esp - sizeof(char** );
         memcpy(*esp, p_argv, sizeof(char **));
 
-        *esp = (char *) *esp - sizeof(int);
+        *esp = *esp - sizeof(int);
         memcpy(*esp, &argc, sizeof(int));
 
         void* return_addr = 0;
-        *esp = (char *) *esp - sizeof(void* );
+        *esp = *esp - sizeof(void* );
         memcpy(*esp, &return_addr, sizeof(void*));
       }
       else
