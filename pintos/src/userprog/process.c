@@ -234,21 +234,24 @@ load (const char *file_name, void (**eip) (void), void **esp)
     goto done;
   process_activate ();
 
-  char* arg;
-  char* saveptr;
+  /* Implemenation Start */
   int argc = 0;
   void** argv[ARGV_MAX_SIZE];
   memset(argv, NULL, sizeof(argv));
 
-  char* filename_args = (char *)malloc(strlen(file_name)+1);
-  strlcpy(filename_args, file_name, strlen(file_name)+1);
+  char* arg;
+  char* saveptr;
+  size_t filename_len = strlen(file_name);
+  char* filename_args = (char *)malloc(filename_len+1);
+
+  strlcpy(filename_args, file_name, filename_len+1);
   arg = strtok_r(filename_args, " ", &saveptr);
   while(arg){
     argv[argc] = arg;
     argc++;
     arg = strtok_r(NULL, " ", &saveptr);
   }
-  /* at this point, we have to do parsing kys1 */
+
   /* Open executable file. */
   file = filesys_open (argv[0]);
   if (file == NULL) 
@@ -342,8 +345,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
  done:
   /* We arrive here whether the load is successful or not. */
-  free(filename_args);
   file_close (file);
+  free(filename_args);
   return success;
 }
 
