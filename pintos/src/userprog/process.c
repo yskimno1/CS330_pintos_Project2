@@ -257,8 +257,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
   /* Implemenation Start */
   int argc = 0;
-  void** argv[ARGV_MAX_SIZE];
-  memset(argv, NULL, sizeof(argv));
+  void* argv[ARGV_MAX_SIZE];
+  memset(argv, (int)NULL, sizeof(argv));
 
   char* arg;
   char* saveptr;

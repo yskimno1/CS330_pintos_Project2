@@ -23,8 +23,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     return;
   }
   int syscall_func = *(int* )if_esp;
-  printf ("system call!\n");
-
+  printf ("system call! %d\n", syscall_func);
   if(syscall_func == SYS_HALT){
     printf("SYS_HALT\n");
   }
