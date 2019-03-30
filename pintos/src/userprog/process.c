@@ -104,8 +104,21 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
+  struct list_elem* e;
+  struct thread* th_child;
+  tid_t matched_tid = -1;
+  for(e=list_begin(&thread_current()->list_children);
+      e=list_end(&thread_current()->list_children); e = list_next(e)){
+    th_child = list_entry(e, struct thread, elem_list_children);
+    if(th_child->tid == child_tid){
+      matched_tid = child_tid;
+      break;
+    } 
+  }
+  if(matched_tid == -1) return -1;
+  if(th_child != NULL) list_remove(e);
   while(1);
-  return -1;
+  return 0;
 }
 
 /* Free the current process's resources. */
@@ -133,6 +146,7 @@ process_exit (void)
       /* print message, kys0 */
     }
   sema_up(&curr->th_parent->sema_load);
+
 }
 
 /* Sets up the CPU for running user code in the current
