@@ -54,8 +54,8 @@ process_execute (const char *file_name)
     palloc_free_page (fn_copy);
 
   /* wait until child ends */
-  sema_down(&thread_current()->sema_load);
-  
+  // sema_down(&thread_current()->sema_load);
+  //if(!success) return -1; yunseong
   return tid;
 }
 
@@ -104,19 +104,20 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
-  struct list_elem* e;
-  struct thread* th_child;
-  tid_t matched_tid = -1;
-  for(e=list_begin(&thread_current()->list_children);
-      e=list_end(&thread_current()->list_children); e = list_next(e)){
-    th_child = list_entry(e, struct thread, elem_list_children);
-    if(th_child->tid == child_tid){
-      matched_tid = child_tid;
-      break;
-    } 
-  }
-  if(matched_tid == -1) return -1;
-  if(th_child != NULL) list_remove(e);
+  // struct list_elem* e;
+  // struct thread* th_child;
+  // tid_t matched_tid = -1;
+  // for(e=list_begin(&thread_current()->list_children);
+  //     e=list_end(&thread_current()->list_children); e = list_next(e)){
+  //   th_child = list_entry(e, struct thread, elem_list_children);
+  //   if(th_child->tid == child_tid){
+  //     matched_tid = child_tid;
+  //     break;
+  //   } 
+  // }
+  // if(matched_tid == -1) return -1;
+  // sema_down(&thread_current()->sema_load);
+  // if(th_child != NULL) list_remove(e);
   while(1);
   return 0;
 }
@@ -145,7 +146,7 @@ process_exit (void)
       pagedir_destroy (pd);
       /* print message, kys0 */
     }
-  sema_up(&curr->th_parent->sema_load);
+  // sema_up(&curr->th_parent->sema_load);
 
 }
 
