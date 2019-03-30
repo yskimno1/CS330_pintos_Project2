@@ -17,6 +17,7 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "threads/synch.h"
 
 #define ARGV_MAX_SIZE 128
 
@@ -50,7 +51,11 @@ process_execute (const char *file_name)
 
   free(filename_copy);
   if (tid == TID_ERROR)
-    palloc_free_page (fn_copy); 
+    palloc_free_page (fn_copy);
+
+  /* wait until child ends */
+  sema_down(&thread_current()->sema_load);
+  
   return tid;
 }
 
@@ -99,6 +104,7 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
+  while(1);
   return -1;
 }
 
@@ -126,7 +132,7 @@ process_exit (void)
       pagedir_destroy (pd);
       /* print message, kys0 */
     }
-  
+  sema_up(&curr->th_parent->sema_load);
 }
 
 /* Sets up the CPU for running user code in the current

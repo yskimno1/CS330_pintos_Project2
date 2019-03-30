@@ -96,7 +96,10 @@ struct thread
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
 #endif
-
+    struct semaphore sema_load;
+    struct thread* th_parent;
+    struct list list_children;
+    struct list_elem elem_list_children;
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
   };
