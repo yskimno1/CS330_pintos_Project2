@@ -23,7 +23,9 @@ syscall_handler (struct intr_frame *f UNUSED)
     return;
   }
   int syscall_func = *(int* )if_esp;
-
   printf ("system call!\n");
+  if(syscall_func == SYS_EXEC){
+    printf("came here\n");
+  }
   thread_exit ();
 }
