@@ -445,7 +445,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
-  t->th_parent = thread_current(); // notsure yunseong..
+  t->th_parent = running_thread(); 
 
   list_init(&t->list_children);
 }
