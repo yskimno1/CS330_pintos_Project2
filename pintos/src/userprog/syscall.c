@@ -24,8 +24,33 @@ syscall_handler (struct intr_frame *f UNUSED)
   }
   int syscall_func = *(int* )if_esp;
   printf ("system call!\n");
-  if(syscall_func == SYS_EXEC){
-    printf("came here\n");
+
+  if(syscall_func == SYS_HALT){
+    printf("SYS_HALT\n");
+  }
+  else if(syscall_func == SYS_EXIT){
+    printf("SYS_EXIT\n");
+  }
+  else if(syscall_func == SYS_EXEC){
+    printf("SYS_EXEC\n");
+  }
+  else if(syscall_func == SYS_WAIT){
+    printf("SYS_WAIT\n");
+  }
+  else if(syscall_func == SYS_CREATE){
+    printf("SYS_CREATE\n");
+  }
+  else if(syscall_func == SYS_REMOVE){
+    printf("SYS_REMOVE\n");
+  }
+  else if(syscall_func == SYS_OPEN){
+    printf("SYS_OPEN\n");
+  }
+  else if(syscall_func == SYS_FILESIZE){
+    printf("SYS_FILESIZE\n");
+  }
+  else{
+    printf("none\n");
   }
   thread_exit ();
 }
