@@ -34,8 +34,7 @@ search_child (struct thread* th, tid_t tid){
   struct list_elem* e;
   struct thread* th_child;
   if(!list_empty(&thread_current()->list_children)){
-    for(e=list_begin(&thread_current()->list_children);
-        e=list_end(&thread_current()->list_children); e = list_next(e)){
+    for(e=list_begin(&thread_current()->list_children); e!=list_end(&thread_current()->list_children); e = list_next(e)){
       th_child = list_entry(e, struct thread, elem_list_children);
       if(th_child->tid == tid) break;
     }
