@@ -291,7 +291,7 @@ thread_exit ()
   ASSERT (!intr_context ());
 
 #ifdef USERPROG
-  process_exit (status);
+  process_exit ();
 #endif
 
   /* Just set our status to dying and schedule another process.
