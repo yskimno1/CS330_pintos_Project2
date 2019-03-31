@@ -522,7 +522,7 @@ setup_stack (void **esp, int argc, void** argv)
         
         char** p_argv = *esp;
         *esp = *esp - sizeof(char** );
-        memcpy(*esp, p_argv, sizeof(char **));
+        memcpy(*esp, &p_argv, sizeof(char **));
 
         *esp = *esp - sizeof(int);
         memcpy(*esp, &argc, sizeof(int));
