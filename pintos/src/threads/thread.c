@@ -188,7 +188,7 @@ thread_create (const char *name, int priority,
 
   t->th_parent = running_thread();
   sema_init(&t->sema_load, 0);
-  list_push_back(&thread_current()->list_children, &t->elem_list_children); //yunseong
+  //list_push_back(&thread_current()->list_children, &t->elem_list_children); //yunseong
   
   /* Stack frame for kernel_thread(). */
   kf = alloc_frame (t, sizeof *kf);
