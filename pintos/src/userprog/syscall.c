@@ -111,7 +111,7 @@ syscall_handler (struct intr_frame *f)
   		f->eax = read((int)argv[0], (void *)argv[1], (unsigned)argv[2]);
   		break;
   	case SYS_WRITE:		/* Write to a file. */
-  		//printf("SYS_WRITE\n");
+  		printf("SYS_WRITE\n");
   		argv[0] = *((uint32_t *)(if_esp+4));
   		argv[1] = *((uint32_t *)(if_esp+8));
   		argv[2] = *((uint32_t *)(if_esp+12));
