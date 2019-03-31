@@ -305,7 +305,7 @@ fd_validate(int fd){
 	val = val && (fd < (t->fd_vld)) ;
 	printf("val = %d\n", val);
 
-	vla = val && t->fdt[fd] != NULL;
+	val = val && t->fdt[fd] != NULL;
 	printf("val = %d\n", val);
 	return val;
 //	return (fd>=0 && fd<128 && fd < (t->fd_vld) && t->fdt[fd] != NULL);
