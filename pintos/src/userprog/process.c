@@ -256,7 +256,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
   /* Implemenation Start */
   int argc = 0;
-  void** argv[ARGV_MAX_SIZE];
+  void* argv[ARGV_MAX_SIZE];
   memset(argv, NULL, sizeof(argv));
 
   char* arg;
