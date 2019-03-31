@@ -15,10 +15,10 @@ main (int argc, char *argv[])
   msg ("begin");
   msg ("argc = %d", argc);
   for (i = 0; i <= argc; i++){
-    printf("1-i = %d\n",i);
+    msg ("1-i = %d\n",i);
     if (argv[i] != NULL){
       msg ("argv[%d] = '%s'", i, argv[i]);
-      printf("2-i = %d\n",i);
+      msg("2-i = %d\n",i);
     }
 
     else{
