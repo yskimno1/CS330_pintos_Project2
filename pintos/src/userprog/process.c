@@ -72,7 +72,7 @@ process_execute (const char *file_name)
     return -1;
   }
   /* if success, wait until child ends */
-  sema_down(&(thread_current()->sema_load));
+  sema_down(&thread_current()->sema_load);
 
   struct thread* th_child = search_child(thread_current, tid);
   if(th_child == NULL) return -1;
