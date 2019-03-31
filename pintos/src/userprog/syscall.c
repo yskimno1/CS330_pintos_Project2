@@ -241,7 +241,7 @@ int write (int fd, const void *buffer, unsigned size){
 		putbuf (buffer, size);
 		printf("3\n");
     lock_release (&filelock);
-    printf("size = %d\n", size)
+    printf("size = %d\n", size);
     return size;  
 	}
 
