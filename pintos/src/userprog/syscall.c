@@ -112,13 +112,13 @@ syscall_handler (struct intr_frame *f)
   		break;
   	case SYS_WRITE:		/* Write to a file. */
   		printf("SYS_WRITE\n");
-  		printf("%d\t %d\t %d\n", *((uint32_t *)(if_esp+4)), *((uint32_t *)(if_esp+8)), *((uint32_t *)(if_esp+12)) );
-  		printf("%p\t %p\t %p\n", ((uint32_t *)(if_esp+4)), ((uint32_t *)(if_esp+8)), ((uint32_t *)(if_esp+12)) );
+  		printf("%d\t %d\t %d\t %d\n", *(uint32_t *)(if_esp), *((uint32_t *)(if_esp+4)), *((uint32_t *)(if_esp+8)), *((uint32_t *)(if_esp+12)) );
+  		printf("%p\t %p\t %p\t %p\n", (uint32_t *)(if_esp), ((uint32_t *)(if_esp+4)), ((uint32_t *)(if_esp+8)), ((uint32_t *)(if_esp+12)) );
   		hex_dump(if_esp, if_esp, 100, 1);
   		argv[0] = *((uint32_t *)(if_esp+4));
   		argv[1] = *((uint32_t *)(if_esp+8));
   		argv[2] = *((uint32_t *)(if_esp+12));
-  		f->eax = read((int)argv[0], (void *)argv[1], (unsigned)argv[2]);
+  		f->eax = write((int)argv[0], (void *)argv[1], (unsigned)argv[2]);
   		break;
   	case SYS_SEEK:		/* Change position in a file. */
   		printf("SYS_SEEK\n");
