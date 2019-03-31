@@ -239,7 +239,6 @@ int write (int fd, const void *buffer, unsigned size){
 	if (fd == 1){
 		printf("2\n");
 		putbuf (buffer, size);
-		printf("3\n");
     lock_release (&filelock);
     printf("size = %d\n", size);
     return size;  
@@ -300,12 +299,9 @@ bool
 fd_validate(int fd){
 	struct thread* t = thread_current();
 	bool val = true;
-	val = val && fd>=0 && fd<128 ;
-	printf("val = %d\n", val);
-	val = val && (fd < (t->fd_vld)) ;
-	printf("val = %d\n", val);
-
-	val = val && t->fdt[fd] != NULL;
+	val = val && fd>=0 && fd<128 && (fd < (t->fd_vld));
+	if (fd >2 )
+		val = val && t->fdt[fd] != NULL;
 	printf("val = %d\n", val);
 	return val;
 //	return (fd>=0 && fd<128 && fd < (t->fd_vld) && t->fdt[fd] != NULL);
