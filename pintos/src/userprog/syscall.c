@@ -1,12 +1,16 @@
 #include "userprog/syscall.h"
 #include <stdio.h>
+#include <stdint.h>
 #include <syscall-nr.h> // syscall names
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/init.h"
+#include "filesys/file.h"
 #include "filesys/filesys.h"
 #include "devices/input.h"
+#include "userprog/process.h"
+
 
 typedef int pid_t;
 
@@ -161,8 +165,7 @@ exit (int status){
 
 pid_t 
 exec (const char *cmd_line){
-	tid_t pid;
-  pid = process_execute (cmd_line);
+	tid_t pid = process_execute (cmd_line);
   return pid;
 }
 
@@ -246,7 +249,7 @@ int write (int fd, const void *buffer, unsigned size){
 }
 
 void seek (int fd, unsigned position){
-	if fd_validate(fd)
+	if (fd_validate(fd))
 		exit(-1);
 	struct file* f = thread_current()->fdt[fd];
   file_seek (f, position);  
