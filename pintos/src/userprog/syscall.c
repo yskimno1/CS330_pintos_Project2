@@ -53,7 +53,6 @@ syscall_handler (struct intr_frame *f)
   int syscall_func = *(uint32_t* )if_esp;
   printf ("system call! %d\n", syscall_func);
 
-  uint32_t* argv;
   uint32_t argv0;
   uint32_t argv1;
   uint32_t argv2;
@@ -66,78 +65,75 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXIT:		/* Terminate this process. */
   		//printf("SYS_EXIT\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		exit((int)argv[0]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		exit((int)argv0);
   		break;
 
   	case SYS_EXEC:		/* Start another process. */
   		printf("SYS_EXEC\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		f->eax = (uint32_t) exec((const char *)argv[0]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		f->eax = (uint32_t) exec((const char *)argv0);
   		break;
 
   	case SYS_WAIT:		/* Wait for a child process to die. */
   		printf("SYS_WAIT\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		wait((pid_t)argv[0]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		wait((pid_t)argv0);
   		break;
 
   	case SYS_CREATE:	/* Create a file. */
   		printf("SYS_CREATE\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		argv[1] = *(uint32_t *)(if_esp+8);
-  		create((const char*)argv[0], (unsigned)argv[1]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv1 = *(uint32_t *)(if_esp+8);
+  		create((const char*)argv0, (unsigned)argv1);
   		break;
 
   	case SYS_REMOVE:	/* Delete a file. */
   		printf("SYS_REMOVE\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		remove((const char *)argv[0]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		remove((const char *)argv0);
   		break;
 
   	case SYS_OPEN:		/* Open a file. */
   		printf("SYS_OPEN\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		open((const char *)argv[0]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		open((const char *)argv0);
   		break;
   	case SYS_FILESIZE:/* Obtain a file's size. */
   		printf("SYS_FILESIZE\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		filesize((int)argv[0]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		filesize((int)argv0);
   		break;
   	case SYS_READ:		/* Read from a file. */
   		//printf("SYS_READ\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		argv[1] = *(uint32_t *)(if_esp+8);
-  		argv[2] = *(uint32_t *)(if_esp+12);
-  		f->eax = read((int)argv[0], (void *)argv[1], (unsigned)argv[2]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv1 = *(uint32_t *)(if_esp+8);
+  		argv2 = *(uint32_t *)(if_esp+12);
+  		f->eax = read((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
   	case SYS_WRITE:		/* Write to a file. */
   		printf("SYS_WRITE\n");
   		hex_dump(if_esp, if_esp, 100, 1);
   		argv0 = *((uint32_t *)(if_esp+4));
-  		printf("1");
   		argv1 = *((uint32_t *)(if_esp+8));
-  		printf("2");
   		argv2 = *((uint32_t *)(if_esp+12));
-  		printf("3");
   		f->eax = write((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
   	case SYS_SEEK:		/* Change position in a file. */
   		printf("SYS_SEEK\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		argv[1] = *(uint32_t *)(if_esp+8);
-  		seek((int)argv[0], (unsigned)argv[1]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv1 = *(uint32_t *)(if_esp+8);
+  		seek((int)argv0, (unsigned)argv1);
   		break;
   	case SYS_TELL:		/* Report current position in a file. */
   		printf("SYS_TELL\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		tell((int)argv[0]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		tell((int)argv0);
   		break;
   	case SYS_CLOSE:
   		printf("SYS_CLOSE\n");
-  		argv[0] = *(uint32_t *)(if_esp+4);
-  		close((int)argv[0]);
+  		argv0 = *(uint32_t *)(if_esp+4);
+  		close((int)argv0);
   		break;
 
   	default:
@@ -236,6 +232,7 @@ int write (int fd, const void *buffer, unsigned size){
   int cnt=-1;
   printf("4\n");
   if (!fd_validate(fd)){
+  	printf("1\n");
   	return cnt;
   }
 	lock_acquire(&filelock);
@@ -304,5 +301,6 @@ static bool put_user (uint8_t *udst, uint8_t byte) {
 bool
 fd_validate(int fd){
 	struct thread* t = thread_current();
+	printf("2\n");
 	return (fd>1 && fd<128 && fd < (t->fd_vld) && t->fdt[fd] != NULL);
 }
