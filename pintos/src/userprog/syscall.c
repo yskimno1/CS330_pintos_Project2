@@ -229,8 +229,7 @@ int read (int fd, void *buffer, unsigned size){
 }
 
 int write (int fd, const void *buffer, unsigned size){
-  int cnt=-1;
-  printf("4\n");
+  int cnt=0;
   if (!fd_validate(fd)){
   	printf("1\n");
   	return cnt;
@@ -301,6 +300,13 @@ static bool put_user (uint8_t *udst, uint8_t byte) {
 bool
 fd_validate(int fd){
 	struct thread* t = thread_current();
-	printf("2\n");
-	return (fd>1 && fd<128 && fd < (t->fd_vld) && t->fdt[fd] != NULL);
+	printf("%d\n", fd);
+	bool val = true;
+	val = val && fd>1 && fd<128;
+	printf("%d\n", val);
+	val = val && fd < (t->fd_vld);
+	printf("%d\n", val);
+	val = val && t->fdt[fd] != NULL;
+	return val;
+	//return (fd>1 && fd<128 && fd < (t->fd_vld) && t->fdt[fd] != NULL);
 }
