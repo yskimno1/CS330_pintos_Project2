@@ -231,12 +231,17 @@ int read (int fd, void *buffer, unsigned size){
 int write (int fd, const void *buffer, unsigned size){
   int cnt=0;
   if (!fd_validate(fd)){
+  	printf("4\n");
   	return cnt;
   }
+  printf("1\n");
 	lock_acquire(&filelock);
 	if (fd == 1){
+		printf("2\n");
 		putbuf (buffer, size);
+		printf("3\n");
     lock_release (&filelock);
+    printf("size = %d\n", size)
     return size;  
 	}
 
