@@ -54,7 +54,9 @@ syscall_handler (struct intr_frame *f)
   printf ("system call! %d\n", syscall_func);
 
   uint32_t* argv;
-
+  uint32_t argv0;
+  uint32_t argv1;
+  uint32_t argv2;
   switch(syscall_func)
   	{
  		case SYS_HALT:		/* Halt the operating system. */
@@ -115,10 +117,10 @@ syscall_handler (struct intr_frame *f)
   		printf("%d\t %d\t %d\t %d\n", *(uint32_t *)(if_esp), *((uint32_t *)(if_esp+4)), *((uint32_t *)(if_esp+8)), *((uint32_t *)(if_esp+12)) );
   		printf("%p\t %p\t %p\t %p\n", (uint32_t *)(if_esp), ((uint32_t *)(if_esp+4)), ((uint32_t *)(if_esp+8)), ((uint32_t *)(if_esp+12)) );
   		hex_dump(if_esp, if_esp, 100, 1);
-  		argv[0] = *((uint32_t *)(if_esp+4));
-  		argv[1] = *((uint32_t *)(if_esp+8));
-  		argv[2] = *((uint32_t *)(if_esp+12));
-  		f->eax = write((int)argv[0], (void *)argv[1], (unsigned)argv[2]);
+  		argv0 = *((uint32_t *)(if_esp+4));
+  		argv1 = *((uint32_t *)(if_esp+8));
+  		argv2 = *((uint32_t *)(if_esp+12));
+  		f->eax = write((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
   	case SYS_SEEK:		/* Change position in a file. */
   		printf("SYS_SEEK\n");
