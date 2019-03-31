@@ -452,7 +452,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
 
   /* for project 2 */
-  list_init(&(t->list_children));
+  list_init(&t->list_children);
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
