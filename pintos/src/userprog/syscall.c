@@ -5,12 +5,16 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/init.h"
+#include "filesys/filesys.h"
+#include "devices/input.h"
+
+typedef int pid_t;
 
 static void syscall_handler (struct intr_frame *);
 static void halt (void);
 static void exit (int status);
 static pid_t exec (const char *file);
-static int wait (pid_t);
+static int wait (pid_t pid);
 static bool create (const char *file, unsigned initial_size);
 static bool remove (const char *file);
 static int open (const char *file);
@@ -30,7 +34,7 @@ void
 syscall_init (void) 
 {
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
-  lock_init (&file_lock);
+  lock_init (&filelock);
 }
 
 static void
@@ -71,7 +75,7 @@ syscall_handler (struct intr_frame *f UNUSED)
   		argv[0] = *(uint32_t *)(if_esp+4);
   		wait((pid_t)argv[0]);
   		break;
-  		
+
   	case SYS_CREATE:	/* Create a file. */
   		printf("SYS_CREATE\n");
   		argv[0] = *(uint32_t *)(if_esp+4);
@@ -146,11 +150,12 @@ exit (int status){
 	printf("%s: exit(%d)\n", thread_name(), status);
 
 	// for문 위치 바뀔수도?? hyunjin
-  for (int i = 3; i < 128; i++) {
+	int i;
+  for (i = 3; i < 128; i++) {
       if (thread_current()->fdt[i] != NULL)
           close(i);  
   }   
-  thread_exit (status);
+  thread_exit ();
  
 } 
 
@@ -158,11 +163,11 @@ pid_t
 exec (const char *cmd_line){
 	tid_t pid;
   pid = process_execute (cmd_line);
-  return tid;
+  return pid;
 }
 
 int wait (pid_t pid){
-
+	return 0;
 }
 
 bool create (const char *file, unsigned initial_size){
@@ -192,17 +197,17 @@ int filesize (int fd){
 }
 
 int read (int fd, void *buffer, unsigned size){
-	int cnt=0;
+	int cnt=0; int i=0;
 	if (!fd_validate(fd))
 		return -1;
 	lock_acquire(&filelock);
 
 	if (fd == 0){			//keyboard input
-		for (int i=0; i++; i<size){
+		for (i=0; i++; i<size){
 			// must be below PHYS_BASE. 
 			if (!is_user_vaddr(buffer+i))
 				return -1;
-			put_user(unint8_t(buffer+i), input_getc());	
+			put_user(uint8_t(buffer+i), input_getc());	
 			cnt++;
 		}
 	}
@@ -227,7 +232,7 @@ int write (int fd, const void *buffer, unsigned size){
 
 	if (fd == 1){
 		putbuf (buffer, size);
-    lock_release (&file_lock);
+    lock_release (&filelock);
     return size;  
 	}
 
@@ -241,7 +246,8 @@ int write (int fd, const void *buffer, unsigned size){
 }
 
 void seek (int fd, unsigned position){
-	assert(fd_validate(fd));
+	if fd_validate(fd)
+		exit(-1);
 	struct file* f = thread_current()->fdt[fd];
   file_seek (f, position);  
 }
@@ -251,12 +257,13 @@ unsigned tell (int fd){
 	struct file* f = thread_current()->fdt[fd];
 	return file_tell(f);
 }
+
 void close (int fd){
 	assert(fd_validate(fd));
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
 	t->fdt[fd] = NULL;
-	return file_close(f);
+	file_close(f);
 }
 
 /* 	Reads a byte at user virtual address UADDR.  
