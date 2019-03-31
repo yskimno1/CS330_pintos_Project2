@@ -448,7 +448,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
   t->th_parent = running_thread(); 
 #ifdef USERPROG
-  for (int i=0; i++; i<128)
+  int i;
+  for (i=0; i++; i<128)
     t->fdt[i] = NULL;
   t->fd_vld = 3;    //0,1,2 invalid
 #endif 
