@@ -101,6 +101,9 @@ struct thread
     struct thread* th_parent;
     struct list list_children;
     struct list_elem elem_list_children;
+    bool is_exited;
+    int exit_status;
+    bool is_loaded;
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
   };
@@ -126,7 +129,7 @@ struct thread *thread_current (void);
 tid_t thread_tid (void);
 const char *thread_name (void);
 
-void thread_exit (void) NO_RETURN;
+void thread_exit () NO_RETURN;
 void thread_yield (void);
 
 int thread_get_priority (void);

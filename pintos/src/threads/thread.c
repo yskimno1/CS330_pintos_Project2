@@ -187,8 +187,10 @@ thread_create (const char *name, int priority,
   tid = t->tid = allocate_tid ();
 
   t->th_parent = running_thread();
-  // sema_init(&t->sema_load, 0);
-  //list_push_back(&thread_current()->list_children, &t->elem_list_children); //yunseong
+  sema_init(&t->sema_load, 0);
+  t->is_loaded = false;
+  t->is_exited = false;
+  list_push_back(&(thread_current()->list_children), &t->elem_list_children); //yunseong
   
   /* Stack frame for kernel_thread(). */
   kf = alloc_frame (t, sizeof *kf);
@@ -284,12 +286,12 @@ thread_tid (void)
 /* Deschedules the current thread and destroys it.  Never
    returns to the caller. */
 void
-thread_exit (void) 
+thread_exit () 
 {
   ASSERT (!intr_context ());
 
 #ifdef USERPROG
-  process_exit ();
+  process_exit (status);
 #endif
 
   /* Just set our status to dying and schedule another process.

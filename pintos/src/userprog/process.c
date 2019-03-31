@@ -28,6 +28,21 @@ static bool load (const char *cmdline, void (**eip) (void), void **esp);
    FILENAME.  The new thread may be scheduled (and may even exit)
    before process_execute() returns.  Returns the new process's
    thread id, or TID_ERROR if the thread cannot be created. */
+
+static struct thread*
+search_child (struct thread* th, tid_t tid){
+  struct list_elem* e;
+  struct thread* th_child;
+  for(e=list_begin(&thread_current()->list_children);
+      e=list_end(&thread_current()->list_children); e = list_next(e)){
+    th_child = list_entry(e, struct thread, elem_list_children);
+    if(th_child->tid == tid) break;
+  }
+
+  if(th_child->is_loaded == false) return NULL;
+  else return th_child;
+}
+
 tid_t
 process_execute (const char *file_name) 
 {
@@ -50,12 +65,15 @@ process_execute (const char *file_name)
   tid = thread_create (func_name, PRI_DEFAULT, start_process, fn_copy);
 
   free(filename_copy);
-  if (tid == TID_ERROR)
+  if (tid == TID_ERROR){
     palloc_free_page (fn_copy);
+    return -1;
+  }
+  /* if success, wait until child ends */
+  sema_down(&(thread_current()->sema_load));
 
-  /* wait until child ends */
-  // sema_down(&thread_current()->sema_load);
-  //if(!success) return -1; yunseong
+  struct thread* th_child = search_child(thread_current, tid);
+  if(th_child == NULL) return -1;
   return tid;
 }
 
@@ -67,7 +85,7 @@ start_process (void *f_name)
   char *file_name = f_name;
   struct intr_frame if_;
   bool success;
-
+  tid_t tid = thread_current()->tid;
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
@@ -77,8 +95,13 @@ start_process (void *f_name)
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
-  if (!success) 
+  sema_up(&thread_current()->th_parent->sema_load);
+
+  if (!success){
+    thread_current()->is_loaded = false;
     thread_exit ();
+  }
+  else thread_current()->is_loaded = true;
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -102,24 +125,19 @@ start_process (void *f_name)
    This function will be implemented in problem 2-2.  For now, it
    does nothing. */
 int
-process_wait (tid_t child_tid UNUSED) 
+process_wait (tid_t child_tid) 
 {
-  // struct list_elem* e;
-  // struct thread* th_child;
-  // tid_t matched_tid = -1;
-  // for(e=list_begin(&thread_current()->list_children);
-  //     e=list_end(&thread_current()->list_children); e = list_next(e)){
-  //   th_child = list_entry(e, struct thread, elem_list_children);
-  //   if(th_child->tid == child_tid){
-  //     matched_tid = child_tid;
-  //     break;
-  //   } 
-  // }
-  // if(matched_tid == -1) return -1;
-  // sema_down(&thread_current()->sema_load);
-  // if(th_child != NULL) list_remove(e);
-  while(1);
-  return 0;
+  if(child_tid == TID_ERROR) return -1;
+
+  struct thread* th_child;
+  th_child = search_child(thread_current(), child_tid);
+  if(th_child == NULL) return -1;
+  if(th_child->is_exited == false) sema_down(&thread_current()->sema_load);
+
+  int status = th_child->exit_status;
+  list_remove(&th_child->elem_list_children);
+
+  return status;
 }
 
 /* Free the current process's resources. */
@@ -128,6 +146,9 @@ process_exit (void)
 {
   struct thread *curr = thread_current ();
   uint32_t *pd;
+
+  curr->is_exited = true;
+  sema_up(&curr->th_parent->sema_load);
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
@@ -146,7 +167,7 @@ process_exit (void)
       pagedir_destroy (pd);
       /* print message, kys0 */
     }
-  // sema_up(&curr->th_parent->sema_load);
+
 }
 
 /* Sets up the CPU for running user code in the current
