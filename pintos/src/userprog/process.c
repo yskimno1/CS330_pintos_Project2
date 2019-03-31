@@ -54,7 +54,7 @@ process_execute (const char *file_name)
     palloc_free_page (fn_copy);
 
   /* wait until child ends */
-  // sema_down(&thread_current()->sema_load);
+  sema_down(&thread_current()->sema_load);
   //if(!success) return -1; yunseong
   return tid;
 }
@@ -147,7 +147,6 @@ process_exit (void)
       /* print message, kys0 */
     }
   // sema_up(&curr->th_parent->sema_load);
-
 }
 
 /* Sets up the CPU for running user code in the current
@@ -531,6 +530,7 @@ setup_stack (void **esp, int argc, void** argv)
         void* return_addr = 0;
         *esp = *esp - sizeof(void* );
         memcpy(*esp, &return_addr, sizeof(void*));
+        hex_dump(*esp, *esp, 100, 1);
       }
       else
         palloc_free_page (kpage);
