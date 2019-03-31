@@ -113,7 +113,6 @@ syscall_handler (struct intr_frame *f)
   		break;
   	case SYS_WRITE:		/* Write to a file. */
   		printf("SYS_WRITE\n");
-  		hex_dump(if_esp, if_esp, 100, 1);
   		argv0 = *((uint32_t *)(if_esp+4));
   		argv1 = *((uint32_t *)(if_esp+8));
   		argv2 = *((uint32_t *)(if_esp+12));
@@ -231,16 +230,12 @@ int read (int fd, void *buffer, unsigned size){
 int write (int fd, const void *buffer, unsigned size){
   int cnt=0;
   if (!fd_validate(fd)){
-  	printf("4\n");
   	return cnt;
   }
-  printf("1\n");
 	lock_acquire(&filelock);
 	if (fd == 1){
-		printf("2\n");
 		putbuf (buffer, size);
     lock_release (&filelock);
-    printf("size = %d\n", size);
     return size;  
 	}
 
@@ -302,7 +297,5 @@ fd_validate(int fd){
 	val = val && fd>=0 && fd<128 && (fd < (t->fd_vld));
 	if (fd >2 )
 		val = val && t->fdt[fd] != NULL;
-	printf("val = %d\n", val);
 	return val;
-//	return (fd>=0 && fd<128 && fd < (t->fd_vld) && t->fdt[fd] != NULL);
 }
