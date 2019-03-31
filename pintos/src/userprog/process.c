@@ -54,7 +54,7 @@ process_execute (const char *file_name)
     palloc_free_page (fn_copy);
 
   /* wait until child ends */
-  sema_down(&thread_current()->sema_load);
+  // sema_down(&thread_current()->sema_load);
   //if(!success) return -1; yunseong
   return tid;
 }
