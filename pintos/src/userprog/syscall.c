@@ -263,7 +263,8 @@ unsigned tell (int fd){
 }
 
 void close (int fd){
-	assert(fd_validate(fd));
+	if (fd_validate(fd))
+		exit(-1);
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
 	t->fdt[fd] = NULL;
