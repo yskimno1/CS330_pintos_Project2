@@ -118,7 +118,7 @@ process_wait (tid_t child_tid UNUSED)
   // if(matched_tid == -1) return -1;
   // sema_down(&thread_current()->sema_load);
   // if(th_child != NULL) list_remove(e);
-  while(1);
+  // while(1);
   return 0;
 }
 
