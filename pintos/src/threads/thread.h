@@ -96,7 +96,10 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
+    struct file* fdt[128];              /* file descriptor table, max 128*/
+    int fd_vld;                         /* vaild descriptor number for next open(fdt[fd_vld] == NULL) */
 #endif
+    int exit_status;
     struct semaphore sema_load;
     struct thread* th_parent;
     struct list list_children;
