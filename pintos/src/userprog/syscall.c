@@ -114,12 +114,13 @@ syscall_handler (struct intr_frame *f)
   		break;
   	case SYS_WRITE:		/* Write to a file. */
   		printf("SYS_WRITE\n");
-  		printf("%d\t %d\t %d\t %d\n", *(uint32_t *)(if_esp), *((uint32_t *)(if_esp+4)), *((uint32_t *)(if_esp+8)), *((uint32_t *)(if_esp+12)) );
-  		printf("%p\t %p\t %p\t %p\n", (uint32_t *)(if_esp), ((uint32_t *)(if_esp+4)), ((uint32_t *)(if_esp+8)), ((uint32_t *)(if_esp+12)) );
   		hex_dump(if_esp, if_esp, 100, 1);
   		argv0 = *((uint32_t *)(if_esp+4));
+  		printf("1");
   		argv1 = *((uint32_t *)(if_esp+8));
+  		printf("2");
   		argv2 = *((uint32_t *)(if_esp+12));
+  		printf("3");
   		f->eax = write((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
   	case SYS_SEEK:		/* Change position in a file. */
@@ -233,23 +234,28 @@ int read (int fd, void *buffer, unsigned size){
 
 int write (int fd, const void *buffer, unsigned size){
   int cnt=-1;
+  printf("4\n");
   if (!fd_validate(fd)){
   	return cnt;
   }
 	lock_acquire(&filelock);
-
+	printf("5\n");
 	if (fd == 1){
+		printf("6\n");
 		putbuf (buffer, size);
     lock_release (&filelock);
     return size;  
 	}
 
 	else {
+		printf("7\n");
 		struct thread* t = thread_current();
 		struct file* f = t->fdt[fd];
 		cnt = file_write(f, buffer, size);
+		printf("8\n");
 	}	
 	lock_release(&filelock);
+	printf("9\n");
 	return cnt;
 }
 
