@@ -113,8 +113,8 @@ syscall_handler (struct intr_frame *f)
   	case SYS_WRITE:		/* Write to a file. */
   		printf("SYS_WRITE\n");
   		printf("%d\t %d\t %d\n", *((uint32_t *)(if_esp+4)), *((uint32_t *)(if_esp+8)), *((uint32_t *)(if_esp+12)) );
-  		printf("%d\t %d\t %d\n", ((uint32_t *)(if_esp+4)), ((uint32_t *)(if_esp+8)), ((uint32_t *)(if_esp+12)) );
-  		hex_dump(*esp, *esp, 100, 1);
+  		printf("%p\t %p\t %p\n", ((uint32_t *)(if_esp+4)), ((uint32_t *)(if_esp+8)), ((uint32_t *)(if_esp+12)) );
+  		hex_dump(*if_esp, *if_esp, 100, 1);
   		argv[0] = *((uint32_t *)(if_esp+4));
   		argv[1] = *((uint32_t *)(if_esp+8));
   		argv[2] = *((uint32_t *)(if_esp+12));
