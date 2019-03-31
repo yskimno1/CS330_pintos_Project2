@@ -515,7 +515,7 @@ setup_stack (void **esp, int argc, void** argv)
         char* zero = 0;
         *esp = *esp - sizeof(char* );
         memcpy(*esp, &zero, sizeof(char* ));
-        for(i=argc; i>=0; i--){ /* one more push */
+        for(i=argc-1; i>=0; i--){ /* one more push */
           *esp = *esp - (sizeof(char* ));
           memcpy(*esp, &pargv[i], sizeof(char* ));
         }
