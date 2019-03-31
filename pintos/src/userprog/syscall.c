@@ -170,7 +170,7 @@ exec (const char *cmd_line){
 }
 
 int wait (pid_t pid){
-	return 0;
+	return pid;
 }
 
 bool create (const char *file, unsigned initial_size){
@@ -200,17 +200,17 @@ int filesize (int fd){
 }
 
 int read (int fd, void *buffer, unsigned size){
-	int cnt=0; int i=0;
+	int cnt=0; int i;
 	if (!fd_validate(fd))
 		return -1;
 	lock_acquire(&filelock);
 
 	if (fd == 0){			//keyboard input
-		for (i=0; i++; i<size){
+		for (i=0; i++; i<size) {
 			// must be below PHYS_BASE. 
 			if (!is_user_vaddr(buffer+i))
 				return -1;
-			put_user(uint8_t(buffer+i), input_getc());	
+			put_user((uint8_t *)(buffer+i), input_getc());	
 			cnt++;
 		}
 	}
@@ -249,14 +249,15 @@ int write (int fd, const void *buffer, unsigned size){
 }
 
 void seek (int fd, unsigned position){
-	if (fd_validate(fd))
+	if (!fd_validate(fd))
 		exit(-1);
 	struct file* f = thread_current()->fdt[fd];
   file_seek (f, position);  
 }
 
 unsigned tell (int fd){
-	assert(fd_validate(fd));
+	if (!fd_validate(fd))
+		exit(-1);
 	struct file* f = thread_current()->fdt[fd];
 	return file_tell(f);
 }
