@@ -186,10 +186,6 @@ thread_create (const char *name, int priority,
   init_thread (t, name, priority);
   tid = t->tid = allocate_tid ();
 
-  t->th_parent = running_thread();
-  sema_init(&t->sema_load, 0);
-  t->is_loaded = false;
-  t->is_exited = false;
   list_push_back(&thread_current()->list_children, &t->elem_list_children); //yunseong
   
   /* Stack frame for kernel_thread(). */
@@ -452,7 +448,11 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
 
   /* for project 2 */
+  sema_init(&t->sema_load, 0);
   list_init(&t->list_children);
+  t->th_parent = running_thread();
+  t->is_loaded = false;
+  t->is_exited = false;
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
