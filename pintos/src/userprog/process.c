@@ -257,7 +257,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
   /* Implemenation Start */
   int argc = 0;
-  void** argv[ARGV_MAX_SIZE];
+  void* argv[ARGV_MAX_SIZE];
   memset(argv, NULL, sizeof(argv));
 
   char* arg;
@@ -523,7 +523,7 @@ setup_stack (void **esp, int argc, void** argv)
         
         char** p_argv = *esp;
         *esp = *esp - sizeof(char** );
-        memcpy(*esp, p_argv, sizeof(char **));
+        memcpy(*esp, &p_argv, sizeof(char **));
 
         *esp = *esp - sizeof(int);
         memcpy(*esp, &argc, sizeof(int));
