@@ -531,6 +531,8 @@ setup_stack (void **esp, int argc, void** argv)
         void* return_addr = 0;
         *esp = *esp - sizeof(void* );
         memcpy(*esp, &return_addr, sizeof(void*));
+
+        hex_dump(*esp, *esp, 100, 1);
       }
       else
         palloc_free_page (kpage);
