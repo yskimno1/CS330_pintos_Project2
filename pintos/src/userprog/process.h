@@ -2,7 +2,6 @@
 #define USERPROG_PROCESS_H
 #define USERPROG
 
-#include <stdlib.h>
 #include "threads/thread.h"
 #include "threads/synch.h"
 
