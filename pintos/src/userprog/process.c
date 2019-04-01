@@ -95,16 +95,12 @@ start_process (void *f_name)
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
-  
+  sema_up(&thread_current()->th_parent->sema_load);
   if (!success){
     thread_current()->is_loaded = false;
-    sema_up(&thread_current()->th_parent->sema_load);
     thread_exit ();
   }
-  else{
-    thread_current()->is_loaded = true;
-    sema_up(&thread_current()->th_parent->sema_load);
-  }
+  else thread_current()->is_loaded = true;
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
      threads/intr-stubs.S).  Because intr_exit takes all of its
@@ -138,7 +134,6 @@ process_wait (tid_t child_tid)
 
   int status = th_child->exit_status;
 
-  
   list_remove(&th_child->elem_list_children);
   sema_up(&thread_current()->sema_exited);
   return status;
@@ -153,9 +148,11 @@ process_exit (void)
 
   curr->is_exited = true;
   sema_up(&curr->th_parent->sema_wait);
-  /* Destroy the current process's page directory and switch back
-     to the kernel-only page directory. */
+  /* wait until parent removes the child in the list */
   sema_down(&curr->th_parent->sema_exited);
+
+  /* Destroy the current process's page directory and switch back
+    to the kernel-only page directory. */
   pd = curr->pagedir;
   if (pd != NULL) 
     {
@@ -524,7 +521,7 @@ setup_stack (void **esp, int argc, void** argv)
         int i;
         for(i=argc-1; i>=0; i--){
           size_t argv_len = strlen(argv[i]);
-          *esp = *esp - (argv_len+1); // asdf
+          *esp = *esp - (argv_len+1);
           memcpy(*esp, argv[i], argv_len+1);
           pargv[i] = *esp;
         }
