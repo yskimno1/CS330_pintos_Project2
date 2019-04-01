@@ -152,6 +152,7 @@ process_exit (void)
   printf("-----\nprocess exit done\n-----\n");
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
+
   pd = curr->pagedir;
   if (pd != NULL) 
     {

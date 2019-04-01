@@ -83,13 +83,17 @@ syscall_handler (struct intr_frame *f)
   		printf("SYS_CREATE\n");
   		argv0 = *(uint32_t *)(if_esp+4);
   		argv1 = *(uint32_t *)(if_esp+8);
+			filelock_acquire();
   		create((const char*)argv0, (unsigned)argv1);
+			filelock_release();
   		break;
 
   	case SYS_REMOVE:	/* Delete a file. */
   		printf("SYS_REMOVE\n");
   		argv0 = *(uint32_t *)(if_esp+4);
-  		remove((const char *)argv0);
+			filelock_acquire();
+  		temp_remove((const char *)argv0);
+			filelock_release();
   		break;
 
   	case SYS_OPEN:		/* Open a file. */
@@ -100,7 +104,9 @@ syscall_handler (struct intr_frame *f)
   	case SYS_FILESIZE:/* Obtain a file's size. */
   		printf("SYS_FILESIZE\n");
   		argv0 = *(uint32_t *)(if_esp+4);
+			filelock_acquire();
   		filesize((int)argv0);
+			filelock_release();
   		break;
   	case SYS_READ:		/* Read from a file. */
   		//printf("SYS_READ\n");
@@ -152,10 +158,12 @@ exit (int status){
 
 	// for문 위치 바뀔수도?? hyunjin
 	int i;
+	filelock_acquire();
   for (i = 3; i < 128; i++) {
       if (thread_current()->fdt[i] != NULL)
           close(i);  
   }   
+	filelock_release();
   thread_exit ();
  
 } 
@@ -174,7 +182,7 @@ bool create (const char *file, unsigned initial_size){
 	return filesys_create(file, initial_size);
 }
 
-bool remove (const char *file){
+bool temp_remove (const char *file){
 	return filesys_remove(file);
 }
 
