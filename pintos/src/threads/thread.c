@@ -453,7 +453,7 @@ init_thread (struct thread *t, const char *name, int priority)
   sema_init(&t->sema_load, 0);
 #ifdef USERPROG
   int i;
-  for (i=0; i++; i<128)
+  for (i=0; i++; i<131)
     t->fdt[i] = NULL;
   t->fd_vld = 3;    //0,1,2 invalid
 #endif 
