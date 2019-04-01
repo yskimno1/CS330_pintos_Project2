@@ -23,7 +23,7 @@ typedef int tid_t;
 #define PRI_MIN 0                       /* Lowest priority. */
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
-
+#define USERPROG
 /* A kernel thread or user process.
 
    Each thread structure is stored in its own 4 kB page.  The
@@ -95,7 +95,10 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
+    struct file* fdt[128];              /* file descriptor table, max 128*/
+    int fd_vld;                         /* vaild descriptor number for next open(fdt[fd_vld] == NULL) */
 #endif
+    int exit_status;
     struct semaphore sema_load;
     struct thread* th_parent;
     struct list list_children;
