@@ -100,6 +100,7 @@ struct thread
 #endif
     struct semaphore sema_load;
     struct semaphore sema_wait;
+    struct semaphore sema_exited;
     struct thread* th_parent;
     struct list list_children;
     struct list_elem elem_list_children;

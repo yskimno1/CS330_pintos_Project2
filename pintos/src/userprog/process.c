@@ -137,8 +137,10 @@ process_wait (tid_t child_tid)
   if(th_child->is_exited == false) sema_down(&thread_current()->sema_wait);
 
   int status = th_child->exit_status;
-  list_remove(&th_child->elem_list_children);
 
+  
+  list_remove(&th_child->elem_list_children);
+  sema_up(&thread_current()->sema_exited);
   return status;
 }
 
@@ -153,7 +155,7 @@ process_exit (void)
   sema_up(&curr->th_parent->sema_wait);
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
-
+  sema_down(&curr->th_parent->sema_exited);
   pd = curr->pagedir;
   if (pd != NULL) 
     {
