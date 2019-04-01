@@ -20,7 +20,7 @@ static void exit (int status);
 static pid_t exec (const char *file);
 static int wait (pid_t pid);
 static bool create (const char *file, unsigned initial_size);
-static bool remove (const char *file);
+static bool temp_remove (const char *file);
 static int open (const char *file);
 static int filesize (int fd);
 static int read (int fd, void *buffer, unsigned size);
