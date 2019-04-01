@@ -16,7 +16,6 @@
 #include "userprog/process.h"
 #endif
 
-
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
    of thread.h for details. */
@@ -38,6 +37,7 @@ static struct thread *initial_thread;
 
 /* Lock used by allocate_tid(). */
 static struct lock tid_lock;
+struct lock filelock;
 
 /* Stack frame for kernel_thread(). */
 struct kernel_thread_frame 
@@ -576,3 +576,19 @@ allocate_tid (void)
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+
+void
+filelock_init(){
+  lock_init(&filelock);
+}
+
+void
+filelock_acquire(){
+  lock_acquire(&filelock);
+}
+
+void
+filelock_release(){
+  lock_release(&filelock);
+}

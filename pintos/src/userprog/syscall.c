@@ -32,13 +32,11 @@ static bool put_user (uint8_t *udst, uint8_t byte);
 static int32_t get_user (const uint8_t *uaddr);
 static bool fd_validate(int fd);
 
-struct lock filelock;
-
 void
 syscall_init (void) 
 {
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
-  lock_init (&filelock);
+  filelock_init();
 }
 
 static void
@@ -139,8 +137,6 @@ syscall_handler (struct intr_frame *f)
   		printf("NONE\n");
   		break;
   	}
-  
-  thread_exit ();
 }
 
 
@@ -183,16 +179,16 @@ bool remove (const char *file){
 }
 
 int open (const char *file){
-	lock_acquire(&filelock);
+	filelock_acquire();
 	struct file* f = filesys_open(file);
 	if (f == NULL) {
-		lock_acquire(&filelock);
+		filelock_acquire();
 		return -1;
 	} 
   struct thread *t = thread_current();
   int fd = (t->fd_vld)++;
   t->fdt[fd] = f;
-  lock_release(&filelock);
+  filelock_release();
   return fd; 
 }
 
@@ -204,7 +200,7 @@ int read (int fd, void *buffer, unsigned size){
 	int cnt=0; int i;
 	if (!fd_validate(fd))
 		return -1;
-	lock_acquire(&filelock);
+	filelock_acquire();
 
 	if (fd == 0){			//keyboard input
 		for (i=0; i++; i<size) {
@@ -223,7 +219,7 @@ int read (int fd, void *buffer, unsigned size){
 		else
 			cnt = file_read(t->fdt[fd], buffer, size);
 	}	
-	lock_release(&filelock);
+	filelock_release();
 	return cnt;
 }
 
@@ -232,10 +228,10 @@ int write (int fd, const void *buffer, unsigned size){
   if (!fd_validate(fd)){
   	return cnt;
   }
-	lock_acquire(&filelock);
+	filelock_acquire();
 	if (fd == 1){
 		putbuf (buffer, size);
-    lock_release (&filelock);
+    filelock_release ();
     return size;  
 	}
 
@@ -244,7 +240,7 @@ int write (int fd, const void *buffer, unsigned size){
 		struct file* f = t->fdt[fd];
 		cnt = file_write(f, buffer, size);
 	}	
-	lock_release(&filelock);
+	filelock_release();
 	return cnt;
 }
 
