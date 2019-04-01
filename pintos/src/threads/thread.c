@@ -451,6 +451,7 @@ init_thread (struct thread *t, const char *name, int priority)
 
   /* for project 2 */
   sema_init(&t->sema_load, 0);
+  sema_init(&t->sema_wait, 0);
 #ifdef USERPROG
   int i;
   for (i=0; i++; i<131)

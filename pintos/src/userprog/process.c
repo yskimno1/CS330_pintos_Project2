@@ -95,14 +95,16 @@ start_process (void *f_name)
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
-  sema_up(&thread_current()->th_parent->sema_load);
-    printf("-----\nstart process \n-----\n");
+  
   if (!success){
     thread_current()->is_loaded = false;
+    sema_up(&thread_current()->th_parent->sema_load);
     thread_exit ();
   }
-  else thread_current()->is_loaded = true;
-
+  else{
+    thread_current()->is_loaded = true;
+    sema_up(&thread_current()->th_parent->sema_load);
+  }
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
      threads/intr-stubs.S).  Because intr_exit takes all of its
@@ -132,7 +134,7 @@ process_wait (tid_t child_tid)
   struct thread* th_child;
   th_child = search_child(thread_current(), child_tid);
   if(th_child == NULL) return -1;
-  if(th_child->is_exited == false) sema_down(&thread_current()->sema_load);
+  if(th_child->is_exited == false) sema_down(&thread_current()->sema_wait);
 
   int status = th_child->exit_status;
   list_remove(&th_child->elem_list_children);
@@ -148,8 +150,7 @@ process_exit (void)
   uint32_t *pd;
 
   curr->is_exited = true;
-  sema_up(&curr->th_parent->sema_load);
-  printf("-----\nprocess exit done\n-----\n");
+  sema_up(&curr->th_parent->sema_wait);
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
 

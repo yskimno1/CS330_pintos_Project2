@@ -99,6 +99,7 @@ struct thread
     int fd_vld;                         /* vaild descriptor number for next open(fdt[fd_vld] == NULL) */
 #endif
     struct semaphore sema_load;
+    struct semaphore sema_wait;
     struct thread* th_parent;
     struct list list_children;
     struct list_elem elem_list_children;
