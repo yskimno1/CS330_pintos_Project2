@@ -158,8 +158,12 @@ exit (int status){
 
 	// for문 위치 바뀔수도?? hyunjin
 	int i;
+<<<<<<< HEAD
 	filelock_acquire();
   for (i = 3; i < 128; i++) {
+=======
+  for (i = 3; i < 131; i++) {
+>>>>>>> be9d7f94089ab85c9c980eb3def0bc34b9f02752
       if (thread_current()->fdt[i] != NULL)
           close(i);  
   }   
@@ -269,9 +273,11 @@ unsigned tell (int fd){
 void close (int fd){
 	if (fd_validate(fd))
 		exit(-1);
+	lock_acquire(&filelock);
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
 	t->fdt[fd] = NULL;
+	lock_release(&filelock);
 	file_close(f);
 }
 
@@ -298,7 +304,7 @@ bool
 fd_validate(int fd){
 	struct thread* t = thread_current();
 	bool val = true;
-	val = val && fd>=0 && fd<128 && (fd < (t->fd_vld));
+	val = val && fd>=0 && fd<131 && (fd < (t->fd_vld));
 	if (fd >2 )
 		val = val && t->fdt[fd] != NULL;
 	return val;
