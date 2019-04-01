@@ -78,7 +78,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_WAIT:		/* Wait for a child process to die. */
   		printf("SYS_WAIT\n");
   		argv0 = *(uint32_t *)(if_esp+4);
-  		wait((pid_t)argv0);
+  		f->eax = wait((pid_t)argv0);
   		break;
 
   	case SYS_CREATE:	/* Create a file. */
@@ -171,7 +171,7 @@ exec (const char *cmd_line){
 }
 
 int wait (pid_t pid){
-	return pid;
+	return process_wait(pid);
 }
 
 bool create (const char *file, unsigned initial_size){
