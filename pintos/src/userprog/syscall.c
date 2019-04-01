@@ -265,9 +265,11 @@ unsigned tell (int fd){
 void close (int fd){
 	if (fd_validate(fd))
 		exit(-1);
+	lock_acquire(&filelock);
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
 	t->fdt[fd] = NULL;
+	lock_release(&filelock);
 	file_close(f);
 }
 
