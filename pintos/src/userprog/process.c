@@ -72,7 +72,6 @@ process_execute (const char *file_name)
   }
   /* if success, wait until child ends */
   sema_down(&thread_current()->sema_load);
-  printf("-----\nprocess execude done\n-----\n");
   struct thread* th_child = search_child(thread_current, tid);
   if(th_child == NULL) return -1;
   return tid;

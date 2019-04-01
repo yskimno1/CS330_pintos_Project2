@@ -151,7 +151,7 @@ halt (void){
 
 void 
 exit (int status){
-	thread_current ()->status = status;
+	thread_current ()->exit_status = status;
 	printf("%s: exit(%d)\n", thread_name(), status);
 
 	// for문 위치 바뀔수도?? hyunjin
