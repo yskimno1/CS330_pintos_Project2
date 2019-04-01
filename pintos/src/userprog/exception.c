@@ -148,13 +148,13 @@ page_fault (struct intr_frame *f)
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
 
-  if(user != false){
-    f->eip = (void (*)(void))f->eax;
-    f->eax = 0xffffffff;
+  if(user != false){ /* if kernel */
+    f->eip = (void (*)(void))f->eax; /* pointer of eax */
+    f->eax = 0xffffffff; /* insert -1 */
     return;
   }
   thread_exit();
-  
+
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
      which fault_addr refers. */
