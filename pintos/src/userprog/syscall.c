@@ -147,8 +147,9 @@ syscall_handler (struct intr_frame *f)
   	}
 }
 
-uint32_t* p_argv(void* addr){
-  if !is_user_vaddr(addr)
+uint32_t* 
+p_argv(void* addr){
+  if (!is_user_vaddr(addr))
     exit(-1);
   return *(uint32_t *)(addr);
 }
@@ -222,7 +223,7 @@ int filesize (int fd){
 }
 
 int read (int fd, void *buffer, unsigned size){
-	int cnt=0; int i;
+	int cnt=0; unsigned i;
 	if (!fd_validate(fd))
 		return -1;
   if (!string_validate(buffer))
