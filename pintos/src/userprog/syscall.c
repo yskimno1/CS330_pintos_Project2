@@ -189,8 +189,10 @@ int wait (pid_t pid){
 }
 
 bool create (const char *file, unsigned initial_size){
-  if (!string_validate(file))
-    return -1;
+  if (file == NULL || *file == NULL)
+    exit(-1);
+  if (!is_user_vaddr(ptr))
+    exit(-1);
 	return filesys_create(file, initial_size);
 }
 
