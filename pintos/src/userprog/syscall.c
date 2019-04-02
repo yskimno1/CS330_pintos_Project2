@@ -32,7 +32,7 @@ static void close (int fd);
 static bool put_user (uint8_t *udst, uint8_t byte);
 static int32_t get_user (const uint8_t *uaddr);
 static bool fd_validate(int fd);
-static bool string_validate(char* ptr);
+static bool string_validate(const char* ptr);
 
 void
 syscall_init (void) 
@@ -188,21 +188,19 @@ int wait (pid_t pid){
 }
 
 bool create (const char *file, unsigned initial_size){
-  if (!string_validate(cmd_line))
-    return -1;
-  if ((int)initial_size < 0)
+  if (!string_validate(file))
     return -1;
 	return filesys_create(file, initial_size);
 }
 
 bool temp_remove (const char *file){
-  if (!string_validate(cmd_line))
+  if (!string_validate(file))
     return -1;
 	return filesys_remove(file);
 }
 
 int open (const char *file){
-  if (!string_validate(cmd_line))
+  if (!string_validate(file))
     return -1;
 	filelock_acquire();
 	struct file* f = filesys_open(file);
@@ -228,7 +226,8 @@ int read (int fd, void *buffer, unsigned size){
 	if (!fd_validate(fd))
 		return -1;
   if (!string_validate(buffer))
-        return -1;
+    return -1;
+
 	filelock_acquire();
 
 	if (fd == 0){			//keyboard input
@@ -329,7 +328,7 @@ fd_validate(int fd){
 }
 
 bool
-string_validate(char* ptr){
+string_validate(const char* ptr){
   if (ptr == NULL)
     return false;
   if (!is_user_vaddr(ptr))
