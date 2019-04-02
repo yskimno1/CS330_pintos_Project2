@@ -15,6 +15,7 @@
 typedef int pid_t;
 
 static void syscall_handler (struct intr_frame *);
+static uint32_t* p_argv(void* addr);
 static void halt (void);
 static void exit (int status);
 static pid_t exec (const char *file);
@@ -31,6 +32,7 @@ static void close (int fd);
 static bool put_user (uint8_t *udst, uint8_t byte);
 static int32_t get_user (const uint8_t *uaddr);
 static bool fd_validate(int fd);
+static bool string_validate(char* ptr);
 
 void
 syscall_init (void) 
@@ -63,26 +65,26 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_EXIT:		/* Terminate this process. */
   		//printf("SYS_EXIT\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv0 = *p_argv(if_esp+4);
   		exit((int)argv0);
   		break;
 
   	case SYS_EXEC:		/* Start another process. */
   		// printf("SYS_EXEC\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv0 = *p_argv(if_esp+4);
   		f->eax = (uint32_t) exec((const char *)argv0);
   		break;
 
   	case SYS_WAIT:		/* Wait for a child process to die. */
   		// printf("SYS_WAIT\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv0 = *p_argv(if_esp+4);
   		f->eax = wait((pid_t)argv0);
   		break;
 
   	case SYS_CREATE:	/* Create a file. */
   		// printf("SYS_CREATE\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
-  		argv1 = *(uint32_t *)(if_esp+8);
+  		argv0 = *p_argv(if_esp+4);
+      argv1 = *p_argv(if_esp+8);
 			filelock_acquire();
   		create((const char*)argv0, (unsigned)argv1);
 			filelock_release();
@@ -90,7 +92,7 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_REMOVE:	/* Delete a file. */
   		// printf("SYS_REMOVE\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
   		temp_remove((const char *)argv0);
 			filelock_release();
@@ -98,44 +100,44 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_OPEN:		/* Open a file. */
   		// printf("SYS_OPEN\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv0 = *p_argv(if_esp+4);
   		open((const char *)argv0);
   		break;
   	case SYS_FILESIZE:/* Obtain a file's size. */
   		// printf("SYS_FILESIZE\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
   		filesize((int)argv0);
 			filelock_release();
   		break;
   	case SYS_READ:		/* Read from a file. */
   		//printf("SYS_READ\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
-  		argv1 = *(uint32_t *)(if_esp+8);
-  		argv2 = *(uint32_t *)(if_esp+12);
+  		argv0 = *p_argv(if_esp+4);
+      argv1 = *p_argv(if_esp+8);
+      argv2 = *p_argv(if_esp+12);
   		f->eax = read((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
   	case SYS_WRITE:		/* Write to a file. */
   		// printf("SYS_WRITE\n");
-  		argv0 = *((uint32_t *)(if_esp+4));
-  		argv1 = *((uint32_t *)(if_esp+8));
-  		argv2 = *((uint32_t *)(if_esp+12));
+      argv0 = *p_argv(if_esp+4);
+      argv1 = *p_argv(if_esp+8);
+      argv2 = *p_argv(if_esp+12);
   		f->eax = write((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
   	case SYS_SEEK:		/* Change position in a file. */
   		// printf("SYS_SEEK\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
-  		argv1 = *(uint32_t *)(if_esp+8);
+      argv0 = *p_argv(if_esp+4);
+      argv1 = *p_argv(if_esp+8);
   		seek((int)argv0, (unsigned)argv1);
   		break;
   	case SYS_TELL:		/* Report current position in a file. */
   		// printf("SYS_TELL\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv0 = *p_argv(if_esp+4);
   		tell((int)argv0);
   		break;
   	case SYS_CLOSE:
   		// printf("SYS_CLOSE\n");
-  		argv0 = *(uint32_t *)(if_esp+4);
+  		argv0 = *p_argv(if_esp+4);
   		close((int)argv0);
   		break;
 
@@ -145,6 +147,11 @@ syscall_handler (struct intr_frame *f)
   	}
 }
 
+uint32_t* p_argv(void* addr){
+  if !is_user_vaddr(addr)
+    exit(-1);
+  return *(uint32_t *)(addr);
+}
 
 void 
 halt (void){
@@ -154,16 +161,12 @@ halt (void){
 void 
 exit (int status){
 	thread_current ()->exit_status = status;
+
 	printf("%s: exit(%d)\n", thread_name(), status);
 
-	// for문 위치 바뀔수도?? hyunjin
 	int i;
-<<<<<<< HEAD
-	filelock_acquire();
-  for (i = 3; i < 128; i++) {
-=======
+  filelock_acquire();
   for (i = 3; i < 131; i++) {
->>>>>>> be9d7f94089ab85c9c980eb3def0bc34b9f02752
       if (thread_current()->fdt[i] != NULL)
           close(i);  
   }   
@@ -174,6 +177,8 @@ exit (int status){
 
 pid_t 
 exec (const char *cmd_line){
+  if (!string_validate(cmd_line))
+    return -1;
 	tid_t pid = process_execute (cmd_line);
   return pid;
 }
@@ -183,14 +188,22 @@ int wait (pid_t pid){
 }
 
 bool create (const char *file, unsigned initial_size){
+  if (!string_validate(cmd_line))
+    return -1;
+  if ((int)initial_size < 0)
+    return -1;
 	return filesys_create(file, initial_size);
 }
 
 bool temp_remove (const char *file){
+  if (!string_validate(cmd_line))
+    return -1;
 	return filesys_remove(file);
 }
 
 int open (const char *file){
+  if (!string_validate(cmd_line))
+    return -1;
 	filelock_acquire();
 	struct file* f = filesys_open(file);
 	if (f == NULL) {
@@ -205,6 +218,8 @@ int open (const char *file){
 }
 
 int filesize (int fd){
+  if (!fd_validate(fd))
+    exit(-1);
 	return file_length(thread_current()->fdt[fd]);
 }
 
@@ -212,6 +227,8 @@ int read (int fd, void *buffer, unsigned size){
 	int cnt=0; int i;
 	if (!fd_validate(fd))
 		return -1;
+  if (!string_validate(buffer))
+        return -1;
 	filelock_acquire();
 
 	if (fd == 0){			//keyboard input
@@ -219,6 +236,7 @@ int read (int fd, void *buffer, unsigned size){
 			// must be below PHYS_BASE. 
 			if (!is_user_vaddr(buffer+i))
 				return -1;
+      
 			put_user((uint8_t *)(buffer+i), input_getc());	
 			cnt++;
 		}
@@ -308,4 +326,11 @@ fd_validate(int fd){
 	if (fd >2 )
 		val = val && t->fdt[fd] != NULL;
 	return val;
+}
+
+bool
+string_validate(char* ptr){
+  if (*ptr == NULL)
+    return false;
+  return true;
 }
