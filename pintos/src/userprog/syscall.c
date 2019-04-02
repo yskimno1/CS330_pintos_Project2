@@ -149,7 +149,7 @@ syscall_handler (struct intr_frame *f)
 
 uint32_t* 
 p_argv(void* addr){
-  if (addr==NULL || *addr == NULL)
+  if (addr==NULL)
     exit(-1);
   if (!is_user_vaddr(addr))
     exit(-1);
