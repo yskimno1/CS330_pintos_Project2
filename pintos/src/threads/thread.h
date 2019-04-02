@@ -132,7 +132,7 @@ struct thread *thread_current (void);
 tid_t thread_tid (void);
 const char *thread_name (void);
 
-void thread_exit () NO_RETURN;
+void thread_exit (void) NO_RETURN;
 void thread_yield (void);
 
 int thread_get_priority (void);
@@ -143,7 +143,7 @@ void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
-void filelock_init();
-void filelock_acquire();
-void filelock_release();
+void filelock_init(void);
+void filelock_acquire(void);
+void filelock_release(void);
 #endif /* threads/thread.h */
