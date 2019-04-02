@@ -151,7 +151,7 @@ uint32_t*
 p_argv(void* addr){
   if (!is_user_vaddr(addr))
     exit(-1);
-  return *(uint32_t *)(addr);
+  return (uint32_t *)(addr);
 }
 
 void 
