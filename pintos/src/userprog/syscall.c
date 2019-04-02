@@ -196,10 +196,9 @@ bool create (const char *file, unsigned initial_size){
     filelock_release();
     exit(-1);
   }
-  if (strlen(file)>14){
-    filelock_release();
+  if (strlen(file)>14)
     return 0;
-  }
+  
 
 	return filesys_create(file, initial_size);
   
