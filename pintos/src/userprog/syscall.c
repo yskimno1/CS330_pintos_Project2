@@ -165,7 +165,7 @@ exit (int status){
 
 	printf("%s: exit(%d)\n", thread_name(), status);
 
-	int i;
+	int i; 
   filelock_acquire();
   for (i = 3; i < 131; i++) {
       if (thread_current()->fdt[i] != NULL)
@@ -189,12 +189,19 @@ int wait (pid_t pid){
 }
 
 bool create (const char *file, unsigned initial_size){
+  if (!string_validate(file)){
+    filelock_release();
+    exit(-1);
+  }
 	return filesys_create(file, initial_size);
+  
 }
 
 bool temp_remove (const char *file){
-  if (!string_validate(file))
-    return -1;
+  if (!string_validate(file)){
+    filelock_release();
+    exit(-1);
+  }
 	return filesys_remove(file);
 }
 
@@ -215,8 +222,10 @@ int open (const char *file){
 }
 
 int filesize (int fd){
-  if (!fd_validate(fd))
+  if (!fd_validate(fd)){
+    filelock_release();
     exit(-1);
+  }
 	return file_length(thread_current()->fdt[fd]);
 }
 
@@ -329,8 +338,8 @@ fd_validate(int fd){
 bool
 string_validate(const char* ptr){
   if (ptr == NULL)
-    exit(-1);
+    return false;
   if (!is_user_vaddr(ptr))
-    exit(-1);
+    return false;
   return true;
 }
