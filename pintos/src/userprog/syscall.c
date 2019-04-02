@@ -291,12 +291,12 @@ unsigned tell (int fd){
 void close (int fd){
 	if (fd_validate(fd))
 		exit(-1);
-	lock_acquire(&filelock);
+	filelock_acquire();
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
 	t->fdt[fd] = NULL;
-	lock_release(&filelock);
-	file_close(f);
+	filelock_release();
+  file_close(f);
 }
 
 /* 	Reads a byte at user virtual address UADDR.  
@@ -330,7 +330,9 @@ fd_validate(int fd){
 
 bool
 string_validate(char* ptr){
-  if (*ptr == NULL)
+  if (ptr == NULL)
+    return false;
+  if (!is_user_vaddr(ptr))
     return false;
   return true;
 }
