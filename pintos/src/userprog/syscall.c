@@ -164,16 +164,19 @@ halt (void){
 
 void 
 exit (int status){
-	thread_current ()->exit_status = status;
-
+  struct thread* t = thread_current();
+  t->exit_status = status;
 	printf("%s: exit(%d)\n", thread_name(), status);
 
 	int i; 
   filelock_acquire();
   for (i = 3; i < 131; i++) {
-      if (thread_current()->fdt[i] != NULL)
-          close(i);  
+      if (t->fdt[i] != NULL){
+        file_close(t->fdt[i]);
+        t->fdt[i] = NULL;
+      }  
   }   
+  
 	filelock_release();
   thread_exit ();
  
@@ -309,8 +312,9 @@ void close (int fd){
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
 	t->fdt[fd] = NULL;
-	filelock_release();
-  file_close(f);
+	file_close(f);
+  filelock_release();
+  
 }
 
 /* 	Reads a byte at user virtual address UADDR.  
