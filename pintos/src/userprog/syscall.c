@@ -103,9 +103,9 @@ syscall_handler (struct intr_frame *f)
   		// printf("SYS_OPEN\n");
   		//argv0 = *p_argv(if_esp+4);
       char** ptr = (char **)(if_esp+4);
-      if (addr==NULL)
+      if (ptr==NULL)
         exit(-1);
-      if (!is_user_vaddr(addr))
+      if (!is_user_vaddr(ptr))
         exit(-1);
       argv0 = *ptr;
   		open((const char *)argv0);
