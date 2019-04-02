@@ -192,8 +192,9 @@ int wait (pid_t pid){
 
 bool create (const char *file, unsigned initial_size){
   if (!string_validate(file)){
-    filelock_release();
-    exit(-1);
+    //filelock_release();
+    //exit(-1);
+    return 0;
   }
 	return filesys_create(file, initial_size);
   
