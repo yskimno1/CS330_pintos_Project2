@@ -1,6 +1,7 @@
 #include "userprog/syscall.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include <syscall-nr.h> // syscall names
 #include "threads/interrupt.h"
 #include "threads/thread.h"
@@ -191,16 +192,17 @@ int wait (pid_t pid){
 }
 
 bool create (const char *file, unsigned initial_size){
-  if (!string_validate(file)){
+  if (!string_validate(file) || strlen(file)>14){
     filelock_release();
     exit(-1);
   }
+
 	return filesys_create(file, initial_size);
   
 }
 
 bool temp_remove (const char *file){
-  if (!string_validate(file)){
+  if (!string_validate(file || strlen(file)>14)){
     filelock_release();
     exit(-1);
   }
@@ -208,7 +210,7 @@ bool temp_remove (const char *file){
 }
 
 int open (const char *file){
-  if (!string_validate(file))
+  if (!string_validate(file) || strlen(file)>14)
     return -1;
 	filelock_acquire();
 	struct file* f = filesys_open(file);
@@ -264,9 +266,10 @@ int read (int fd, void *buffer, unsigned size){
 
 int write (int fd, const void *buffer, unsigned size){
   int cnt=0;
-  if (!fd_validate(fd)){
+  if (!fd_validate(fd) || !string_validate(buffer)){
   	return cnt;
   }
+
 	filelock_acquire();
 	if (fd == 1){
 		putbuf (buffer, size);
@@ -347,3 +350,4 @@ string_validate(const char* ptr){
     return false;
   return true;
 }
+
