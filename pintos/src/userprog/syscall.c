@@ -102,7 +102,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_OPEN:		/* Open a file. */
   		// printf("SYS_OPEN\n");
   		//argv0 = *p_argv(if_esp+4);
-      ptr = (char **)(if_esp+4);
+      char** ptr = (char **)(if_esp+4);
       if (addr==NULL)
         exit(-1);
       if (!is_user_vaddr(addr))
