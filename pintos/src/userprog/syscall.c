@@ -87,7 +87,7 @@ syscall_handler (struct intr_frame *f)
   		argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
 			filelock_acquire();
-  		create((const char*)argv0, (unsigned)argv1);
+  		f->eax = create((const char*)argv0, (unsigned)argv1);
 			filelock_release();
   		break;
 
@@ -198,7 +198,6 @@ bool create (const char *file, unsigned initial_size){
   }
   if (strlen(file)>14)
     return 0;
-  
 
 	return filesys_create(file, initial_size);
   
