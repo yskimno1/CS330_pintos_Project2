@@ -342,6 +342,7 @@ fd_validate(int fd){
 	return val;
 }
 
+//bad ptr condition? hyunjin
 bool
 string_validate(const char* ptr){
   if (ptr == NULL)
