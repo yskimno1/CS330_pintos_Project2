@@ -192,9 +192,8 @@ int wait (pid_t pid){
 
 bool create (const char *file, unsigned initial_size){
   if (!string_validate(file)){
-    //filelock_release();
-    //exit(-1);
-    return 0;
+    filelock_release();
+    exit(-1);
   }
 	return filesys_create(file, initial_size);
   
@@ -341,6 +340,8 @@ fd_validate(int fd){
 bool
 string_validate(const char* ptr){
   if (ptr == NULL)
+    return false;
+  if (*ptr == NULL)
     return false;
   if (!is_user_vaddr(ptr))
     return false;
