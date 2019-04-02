@@ -99,18 +99,11 @@ syscall_handler (struct intr_frame *f)
 			filelock_release();
   		break;
 
-  	case SYS_OPEN:	{	/* Open a file. */
+  	case SYS_OPEN:		/* Open a file. */
   		// printf("SYS_OPEN\n");
-  		//argv0 = *p_argv(if_esp+4);
-      char** ptr = (char **)(if_esp+4);
-      if (ptr==NULL)
-        exit(-1);
-      if (!is_user_vaddr(ptr))
-        exit(-1);
-      argv0 = *ptr;
+  		argv0 = *p_argv(if_esp+4);
   		open((const char *)argv0);
   		break;
-    }
   	case SYS_FILESIZE:/* Obtain a file's size. */
   		// printf("SYS_FILESIZE\n");
   		argv0 = *p_argv(if_esp+4);
@@ -224,7 +217,7 @@ int open (const char *file){
 	filelock_acquire();
 	struct file* f = filesys_open(file);
 	if (f == NULL) {
-		filelock_acquire();
+		filelock_release();
 		return -1;
 	} 
   struct thread *t = thread_current();
