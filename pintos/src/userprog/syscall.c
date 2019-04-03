@@ -102,7 +102,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_OPEN:		/* Open a file. */
   		// printf("SYS_OPEN\n");
   		argv0 = *p_argv(if_esp+4);
-  		open((const char *)argv0);
+  		f->eax = open((const char *)argv0);
   		break;
   	case SYS_FILESIZE:/* Obtain a file's size. */
   		// printf("SYS_FILESIZE\n");
