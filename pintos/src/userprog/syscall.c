@@ -148,8 +148,7 @@ syscall_handler (struct intr_frame *f)
   		argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
       argv2 = *p_argv(if_esp+12);
-			result = read((int)argv0, (void *)argv1, (unsigned)argv2);
-
+			f->eax = read((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
   	case SYS_WRITE:		/* Write to a file. */
   		// printf("SYS_WRITE\n");
