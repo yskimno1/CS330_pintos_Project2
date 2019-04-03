@@ -267,15 +267,14 @@ int temp_remove (const char *file){
 int open (const char *file){
   if (!string_validate(file) || strlen(file)>14)
     return -1;
-	if (strcmp(file, "")==0){
-		return 0;
-	}
 	filelock_acquire();
+
 	struct file* f = filesys_open(file);
 	if (f == NULL) {
 		filelock_release();
 		return -1;
-	} 
+	}
+	 
   struct thread *t = thread_current();
   int fd = (t->fd_vld)++;
   t->fdt[fd] = f;
@@ -402,12 +401,13 @@ fd_validate(int fd){
 //bad ptr condition? hyunjin
 bool
 string_validate(const char* ptr){
+	if (!is_user_vaddr(ptr))
+    return false;
   if (ptr == NULL)
     return false;
-  // if (*ptr == NULL)
-  //   return false;
-  if (!is_user_vaddr(ptr))
-    return false;
+	if (strcmp(ptr, "")==0){
+		return -1;
+	}
   return true;
 }
 
