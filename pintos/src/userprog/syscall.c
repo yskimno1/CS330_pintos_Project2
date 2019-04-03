@@ -342,8 +342,8 @@ int write (int fd, const void *buffer, unsigned size){
 
 	filelock_acquire();
 	if (fd == 1){
+		filelock_release ();
 		putbuf (buffer, size);
-    filelock_release ();
     return size;  
 	}
 
