@@ -54,6 +54,7 @@ syscall_handler (struct intr_frame *f)
   int syscall_func = *(uint32_t* )if_esp;
   // printf ("system call! %d\n", syscall_func);
 	int result;
+	bool result_bool;
   uint32_t argv0;
   uint32_t argv1;
   uint32_t argv2;
@@ -93,12 +94,8 @@ syscall_handler (struct intr_frame *f)
 				exit(-1);
 				break;
 			}
-			else if(result == 0){
-				f->eax = false;
-				break;
-			}
 			else{
-				f->eax = true;
+				f->eax = (bool)result;
 				break;
 			}
 
@@ -112,7 +109,7 @@ syscall_handler (struct intr_frame *f)
 				exit(-1);
 				break;
 			}
-			else if(result == 0){
+			else if(result == true){
 				f->eax = false;
 				break;
 			}
