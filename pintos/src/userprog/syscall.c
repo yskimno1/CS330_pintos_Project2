@@ -22,7 +22,7 @@ static void exit (int status);
 static pid_t exec (const char *file);
 static int wait (pid_t pid);
 static int create (const char *file, unsigned initial_size);
-static bool temp_remove (const char *file);
+static int temp_remove (const char *file);
 static int open (const char *file);
 static int filesize (int fd);
 static int read (int fd, void *buffer, unsigned size);
@@ -112,16 +112,27 @@ syscall_handler (struct intr_frame *f)
 				exit(-1);
 				break;
 			}
+			else if(result == 0){
+				f->eax = false;
+				break;
+			}
 			else{
-				f->eax = result;
+				f->eax = true;
 				break;
 			}
 
   	case SYS_OPEN:		/* Open a file. */
   		// printf("SYS_OPEN\n");
   		argv0 = *p_argv(if_esp+4);
-  		f->eax = open((const char *)argv0);
-  		break;
+			result = open((const char *)argv0);
+			if(result == -1){
+				exit(-1);
+				break;
+			}
+			else{
+				f->eax = result;
+				break;
+			}
 
   	case SYS_FILESIZE:/* Obtain a file's size. */
   		// printf("SYS_FILESIZE\n");
@@ -255,9 +266,9 @@ int create (const char *file, unsigned initial_size){
   
 }
 
-bool temp_remove (const char *file){
+int temp_remove (const char *file){
   if (!string_validate(file) || strlen(file)>14){
-    return false;
+    return -1;
   }
 	return filesys_remove(file);
 }
