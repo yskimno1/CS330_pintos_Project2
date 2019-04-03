@@ -339,19 +339,15 @@ int write (int fd, const void *buffer, unsigned size){
 		exit(-1);
 		return -1;
 	}
-
-	filelock_acquire();
 	if (fd == 1){
-		filelock_release ();
 		putbuf (buffer, size);
     return size;  
 	}
-
-	else {
-		struct thread* t = thread_current();
-		struct file* f = t->fdt[fd];
-		cnt = file_write(f, buffer, size);
-	}	
+	// else
+	filelock_acquire();
+	struct thread* t = thread_current();
+	struct file* f = t->fdt[fd];
+	cnt = file_write(f, buffer, size);	
 	filelock_release();
 	return cnt;
 }
