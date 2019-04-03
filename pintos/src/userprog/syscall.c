@@ -53,7 +53,7 @@ syscall_handler (struct intr_frame *f)
   }
   int syscall_func = *(uint32_t* )if_esp;
   // printf ("system call! %d\n", syscall_func);
-
+	int result;
   uint32_t argv0;
   uint32_t argv1;
   uint32_t argv2;
@@ -104,7 +104,7 @@ syscall_handler (struct intr_frame *f)
   		// printf("SYS_REMOVE\n");
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
-			int result = temp_remove((const char* )argv0);
+			result = temp_remove((const char* )argv0);
 			if(result == -1){
 				filelock_release();
 				exit(-1);
@@ -126,7 +126,7 @@ syscall_handler (struct intr_frame *f)
   		// printf("SYS_FILESIZE\n");
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
-			int result = filesize((int)argv0);
+			result = filesize((int)argv0);
 			if(result == -1){
 				filelock_release();
 				exit(-1);
@@ -156,7 +156,7 @@ syscall_handler (struct intr_frame *f)
   		// printf("SYS_SEEK\n");
       argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
-			int result = seek((int)argv0, (unsigned)argv1);
+			result = seek((int)argv0, (unsigned)argv1);
 			if(result == -1){
 				exit(-1);
 				break;
@@ -169,7 +169,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_TELL:		/* Report current position in a file. */
   		// printf("SYS_TELL\n");
   		argv0 = *p_argv(if_esp+4);
-			int result = tell((int)argv0);
+			result = tell((int)argv0);
 			if(result == -1){
 				exit(-1);
 				break;
@@ -182,7 +182,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_CLOSE:
   		// printf("SYS_CLOSE\n");
   		argv0 = *p_argv(if_esp+4);
-			int result = close((int)argv0);
+			result = close((int)argv0);
 			if(result == -1){
 				exit(-1);
 				break;
@@ -257,7 +257,7 @@ bool create (const char *file, unsigned initial_size){
 }
 
 bool temp_remove (const char *file){
-  if (!string_validate(file || strlen(file)>14)){
+  if (!string_validate(file) || strlen(file)>14){
     filelock_release();
     return false;
   }
