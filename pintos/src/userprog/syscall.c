@@ -122,12 +122,12 @@ syscall_handler (struct intr_frame *f)
   		// printf("SYS_OPEN\n");
   		argv0 = *p_argv(if_esp+4);
 			result = open((const char *)argv0);
-			if(result == -1){
+			if(result == -2){
 				exit(-1);
 				break;
 			}
 			else{
-				if(result == -2) f->eax = -1;
+				if(result == -3) f->eax = -1;
 				else f->eax = result;
 				break;
 			}
@@ -273,12 +273,12 @@ int temp_remove (const char *file){
 
 int open (const char *file){
   if (!string_validate(file) || strlen(file)>14)
-    return -1;
+    return -2;
 	filelock_acquire();
 	struct file* f = filesys_open(file);
 	if (f == NULL) {
 		filelock_release();
-		return -2;
+		return -3;
 	} 
   struct thread *t = thread_current();
   int fd = (t->fd_vld)++;
