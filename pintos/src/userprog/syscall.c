@@ -21,7 +21,7 @@ static void halt (void);
 static void exit (int status);
 static pid_t exec (const char *file);
 static int wait (pid_t pid);
-static bool create (const char *file, unsigned initial_size);
+static int create (const char *file, unsigned initial_size);
 static bool temp_remove (const char *file);
 static int open (const char *file);
 static int filesize (int fd);
@@ -93,9 +93,12 @@ syscall_handler (struct intr_frame *f)
 				exit(-1);
 				break;
 			}
+			else if(result == 0){
+				f->eax = false;
+				break;
+			}
 			else{
-				f->eax = result;
-				// f->eax = create((const char*)argv0, (unsigned)argv1);
+				f->eax = true;
 				break;
 			}
 
@@ -241,7 +244,7 @@ int wait (pid_t pid){
 	return process_wait(pid);
 }
 
-bool create (const char *file, unsigned initial_size){
+int create (const char *file, unsigned initial_size){
   if (!string_validate(file)){
     return -1;
   }
