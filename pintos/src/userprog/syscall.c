@@ -95,7 +95,7 @@ syscall_handler (struct intr_frame *f)
   		// printf("SYS_REMOVE\n");
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
-  		temp_remove((const char *)argv0);
+  		f->eax = temp_remove((const char *)argv0);
 			filelock_release();
   		break;
 
@@ -104,13 +104,15 @@ syscall_handler (struct intr_frame *f)
   		argv0 = *p_argv(if_esp+4);
   		f->eax = open((const char *)argv0);
   		break;
+
   	case SYS_FILESIZE:/* Obtain a file's size. */
   		// printf("SYS_FILESIZE\n");
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
-  		filesize((int)argv0);
+  		f->eax = filesize((int)argv0);
 			filelock_release();
   		break;
+
   	case SYS_READ:		/* Read from a file. */
   		//printf("SYS_READ\n");
   		argv0 = *p_argv(if_esp+4);
@@ -131,11 +133,13 @@ syscall_handler (struct intr_frame *f)
       argv1 = *p_argv(if_esp+8);
   		seek((int)argv0, (unsigned)argv1);
   		break;
+
   	case SYS_TELL:		/* Report current position in a file. */
   		// printf("SYS_TELL\n");
   		argv0 = *p_argv(if_esp+4);
-  		tell((int)argv0);
+  		f->eax = tell((int)argv0);
   		break;
+			
   	case SYS_CLOSE:
   		// printf("SYS_CLOSE\n");
   		argv0 = *p_argv(if_esp+4);
