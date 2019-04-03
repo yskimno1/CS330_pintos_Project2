@@ -19,7 +19,7 @@ typedef int pid_t;
 static void syscall_handler (struct intr_frame *);
 static uint32_t* p_argv(void* addr);
 static void halt (void);
-static void exit (int status);
+void exit (int status);
 static pid_t exec (const char *file);
 static int wait (pid_t pid);
 static int create (const char *file, unsigned initial_size);
