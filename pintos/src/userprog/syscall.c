@@ -6,7 +6,7 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
-#include "threads/pagedir.h"
+#include "userprog/pagedir.h"
 #include "threads/init.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
