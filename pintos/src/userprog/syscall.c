@@ -28,7 +28,7 @@ static int filesize (int fd);
 static int read (int fd, void *buffer, unsigned size);
 static int write (int fd, const void *buffer, unsigned size);
 static void seek (int fd, unsigned position);
-static unsigned tell (int fd);
+static int tell (int fd);
 static void close (int fd);
 static bool put_user (uint8_t *udst, uint8_t byte);
 static int32_t get_user (const uint8_t *uaddr);
@@ -259,7 +259,7 @@ bool create (const char *file, unsigned initial_size){
 bool temp_remove (const char *file){
   if (!string_validate(file || strlen(file)>14)){
     filelock_release();
-    return -1;
+    return false;
   }
 	return filesys_remove(file);
 }
@@ -343,12 +343,12 @@ int write (int fd, const void *buffer, unsigned size){
 
 void seek (int fd, unsigned position){
 	if (!fd_validate(fd))
-		return -1;
+		return;
 	struct file* f = thread_current()->fdt[fd];
   file_seek (f, position);  
 }
 
-unsigned tell (int fd){
+int tell (int fd){
 	if (!fd_validate(fd))
 		return -1;
 	struct file* f = thread_current()->fdt[fd];
@@ -357,7 +357,7 @@ unsigned tell (int fd){
 
 void close (int fd){
 	if (fd_validate(fd))
-		return -1;
+		return;
 	filelock_acquire();
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
