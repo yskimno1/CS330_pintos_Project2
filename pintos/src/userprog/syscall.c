@@ -246,7 +246,7 @@ bool create (const char *file, unsigned initial_size){
     return -1;
   }
   if (strlen(file)>14)
-    return -1;
+    return 0;
 
 	return filesys_create(file, initial_size);
   
