@@ -156,7 +156,7 @@ syscall_handler (struct intr_frame *f)
   		// printf("SYS_SEEK\n");
       argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
-			result = seek((int)argv0, (unsigned)argv1);
+			seek((int)argv0, (unsigned)argv1);
 			if(result == -1){
 				exit(-1);
 				break;
@@ -182,7 +182,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_CLOSE:
   		// printf("SYS_CLOSE\n");
   		argv0 = *p_argv(if_esp+4);
-			result = close((int)argv0);
+			close((int)argv0);
 			if(result == -1){
 				exit(-1);
 				break;
