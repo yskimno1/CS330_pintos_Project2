@@ -89,6 +89,7 @@ syscall_handler (struct intr_frame *f)
   		// printf("SYS_CREATE\n");
   		argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
+
 			filelock_acquire();
 			int result = create((const char*)argv0, (unsigned)argv1);
 			filelock_release();
@@ -147,7 +148,8 @@ syscall_handler (struct intr_frame *f)
   		argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
       argv2 = *p_argv(if_esp+12);
-  		f->eax = read((int)argv0, (void *)argv1, (unsigned)argv2);
+			result = read((int)argv0, (void *)argv1, (unsigned)argv2);
+
   		break;
   	case SYS_WRITE:		/* Write to a file. */
   		// printf("SYS_WRITE\n");
@@ -186,15 +188,8 @@ syscall_handler (struct intr_frame *f)
   	case SYS_CLOSE:
   		// printf("SYS_CLOSE\n");
   		argv0 = *p_argv(if_esp+4);
+
 			close((int)argv0);
-			if(result == -1){
-				exit(-1);
-				break;
-			}
-			else{
-				f->eax = result;
-				break;
-			}
 
   	default:
   		// printf("NONE\n");
@@ -254,6 +249,7 @@ int create (const char *file, unsigned initial_size){
   if (!string_validate(file)){
     return -1;
   }
+	if (is_bad_pointer(file+initial_size)) return -1;
   if (strlen(file)>14)
     return 0;
 
@@ -298,9 +294,15 @@ int read (int fd, void *buffer, unsigned size){
 	int cnt=-1; unsigned i;
 	if (!fd_validate(fd))
 		return -1;
-  if (!string_validate(buffer))
-    return -1;
 
+  if (!string_validate(buffer)){
+		exit(-1);
+    return -1;
+	}
+	if (is_bad_pointer(buffer+size)){
+		exit(-1);
+		return -1;
+	}
 	filelock_acquire();
 
 	if (fd == 0){			//keyboard input
@@ -327,9 +329,17 @@ int read (int fd, void *buffer, unsigned size){
 
 int write (int fd, const void *buffer, unsigned size){
   int cnt=-1;
-  if (!fd_validate(fd) || !string_validate(buffer)){
+  if (!fd_validate(fd)){
   	return cnt;
   }
+  if (!string_validate(buffer)){
+		exit(-1);
+    return cnt;
+	}
+	if (is_bad_pointer(buffer+size)){
+		exit(-1);
+		return -1;
+	}
 
 	filelock_acquire();
 	if (fd == 1){
@@ -362,7 +372,8 @@ int tell (int fd){
 }
 
 void close (int fd){
-	if (fd_validate(fd))
+	if (!fd_validate(fd))
+		exit(-1);
 		return;
 	filelock_acquire();
 	struct thread* t = thread_current();
