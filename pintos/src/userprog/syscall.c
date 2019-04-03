@@ -88,15 +88,14 @@ syscall_handler (struct intr_frame *f)
       argv1 = *p_argv(if_esp+8);
 			filelock_acquire();
 			int result = create((const char*)argv0, (unsigned)argv1);
+			filelock_release();
 			if(result == -1){
-				filelock_release();
 				exit(-1);
 				break;
 			}
 			else{
 				f->eax = result;
 				// f->eax = create((const char*)argv0, (unsigned)argv1);
-				filelock_release();
 				break;
 			}
 
@@ -105,14 +104,13 @@ syscall_handler (struct intr_frame *f)
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
 			result = temp_remove((const char* )argv0);
+			filelock_release();
 			if(result == -1){
-				filelock_release();
 				exit(-1);
 				break;
 			}
 			else{
 				f->eax = result;
-				filelock_release();
 				break;
 			}
 
@@ -127,14 +125,13 @@ syscall_handler (struct intr_frame *f)
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
 			result = filesize((int)argv0);
+			filelock_release();
 			if(result == -1){
-				filelock_release();
 				exit(-1);
 				break;
 			}
 			else{
 				f->eax = result;
-				filelock_release();
 				break;
 			}
 
