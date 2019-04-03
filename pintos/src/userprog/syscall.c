@@ -243,7 +243,6 @@ int wait (pid_t pid){
 
 bool create (const char *file, unsigned initial_size){
   if (!string_validate(file)){
-    filelock_release();
     return -1;
   }
   if (strlen(file)>14)
@@ -255,7 +254,6 @@ bool create (const char *file, unsigned initial_size){
 
 bool temp_remove (const char *file){
   if (!string_validate(file) || strlen(file)>14){
-    filelock_release();
     return false;
   }
 	return filesys_remove(file);
