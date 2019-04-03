@@ -35,6 +35,7 @@ static bool put_user (uint8_t *udst, uint8_t byte);
 static int32_t get_user (const uint8_t *uaddr);
 static bool fd_validate(int fd);
 static bool string_validate(const char* ptr);
+static bool is_bad_pointer(const char* ptr);
 
 void
 syscall_init (void) 
@@ -207,6 +208,8 @@ p_argv(void* addr){
     exit(-1);
   if (!is_user_vaddr(addr))
     exit(-1);
+	if(is_bad_pointer(addr))
+		exit(-1);
   return (uint32_t *)(addr);
 }
 
@@ -410,4 +413,11 @@ string_validate(const char* ptr){
 		return -1;
 	}
   return true;
+}
+
+bool
+is_bad_pointer(const char* ptr){
+	void* ptr_page = pagedir_get_page(thread_current()->pagedir, ptr);
+	if(!ptr_page) return true;
+	else return false;
 }
