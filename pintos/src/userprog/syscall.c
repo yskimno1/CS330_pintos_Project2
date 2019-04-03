@@ -127,7 +127,8 @@ syscall_handler (struct intr_frame *f)
 				break;
 			}
 			else{
-				f->eax = result;
+				if(result == -2) f->eax = -1;
+				else f->eax = result;
 				break;
 			}
 
@@ -277,7 +278,7 @@ int open (const char *file){
 	struct file* f = filesys_open(file);
 	if (f == NULL) {
 		filelock_release();
-		return -1;
+		return -2;
 	} 
   struct thread *t = thread_current();
   int fd = (t->fd_vld)++;
