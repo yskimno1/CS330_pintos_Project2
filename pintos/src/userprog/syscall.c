@@ -87,17 +87,34 @@ syscall_handler (struct intr_frame *f)
   		argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
 			filelock_acquire();
-  		f->eax = create((const char*)argv0, (unsigned)argv1);
-			filelock_release();
-  		break;
+			int result = create((const char*)argv0, (unsigned)argv1);
+			if(result == -1){
+				filelock_release();
+				exit(-1);
+				break;
+			}
+			else{
+				f->eax = result;
+				// f->eax = create((const char*)argv0, (unsigned)argv1);
+				filelock_release();
+				break;
+			}
 
   	case SYS_REMOVE:	/* Delete a file. */
   		// printf("SYS_REMOVE\n");
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
-  		f->eax = temp_remove((const char *)argv0);
-			filelock_release();
-  		break;
+			int result = temp_remove((const char* )argv0);
+			if(result == -1){
+				filelock_release();
+				exit(-1);
+				break;
+			}
+			else{
+				f->eax = result;
+				filelock_release();
+				break;
+			}
 
   	case SYS_OPEN:		/* Open a file. */
   		// printf("SYS_OPEN\n");
@@ -109,9 +126,17 @@ syscall_handler (struct intr_frame *f)
   		// printf("SYS_FILESIZE\n");
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
-  		f->eax = filesize((int)argv0);
-			filelock_release();
-  		break;
+			int result = filesize((int)argv0);
+			if(result == -1){
+				filelock_release();
+				exit(-1);
+				break;
+			}
+			else{
+				f->eax = result;
+				filelock_release();
+				break;
+			}
 
   	case SYS_READ:		/* Read from a file. */
   		//printf("SYS_READ\n");
@@ -131,20 +156,41 @@ syscall_handler (struct intr_frame *f)
   		// printf("SYS_SEEK\n");
       argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
-  		seek((int)argv0, (unsigned)argv1);
-  		break;
+			int result = seek((int)argv0, (unsigned)argv1);
+			if(result == -1){
+				exit(-1);
+				break;
+			}
+			else{
+				f->eax = result;
+				break;
+			}
 
   	case SYS_TELL:		/* Report current position in a file. */
   		// printf("SYS_TELL\n");
   		argv0 = *p_argv(if_esp+4);
-  		f->eax = tell((int)argv0);
-  		break;
-			
+			int result = tell((int)argv0);
+			if(result == -1){
+				exit(-1);
+				break;
+			}
+			else{
+				f->eax = result;
+				break;
+			}
+
   	case SYS_CLOSE:
   		// printf("SYS_CLOSE\n");
   		argv0 = *p_argv(if_esp+4);
-  		close((int)argv0);
-  		break;
+			int result = close((int)argv0);
+			if(result == -1){
+				exit(-1);
+				break;
+			}
+			else{
+				f->eax = result;
+				break;
+			}
 
   	default:
   		// printf("NONE\n");
@@ -201,10 +247,10 @@ int wait (pid_t pid){
 bool create (const char *file, unsigned initial_size){
   if (!string_validate(file)){
     filelock_release();
-    exit(-1);
+    return -1;
   }
   if (strlen(file)>14)
-    return 0;
+    return -1;
 
 	return filesys_create(file, initial_size);
   
@@ -213,7 +259,7 @@ bool create (const char *file, unsigned initial_size){
 bool temp_remove (const char *file){
   if (!string_validate(file || strlen(file)>14)){
     filelock_release();
-    exit(-1);
+    return -1;
   }
 	return filesys_remove(file);
 }
@@ -237,13 +283,13 @@ int open (const char *file){
 int filesize (int fd){
   if (!fd_validate(fd)){
     filelock_release();
-    exit(-1);
+    return -1;
   }
 	return file_length(thread_current()->fdt[fd]);
 }
 
 int read (int fd, void *buffer, unsigned size){
-	int cnt=0; unsigned i;
+	int cnt=-1; unsigned i;
 	if (!fd_validate(fd))
 		return -1;
   if (!string_validate(buffer))
@@ -274,7 +320,7 @@ int read (int fd, void *buffer, unsigned size){
 }
 
 int write (int fd, const void *buffer, unsigned size){
-  int cnt=0;
+  int cnt=-1;
   if (!fd_validate(fd) || !string_validate(buffer)){
   	return cnt;
   }
@@ -297,21 +343,21 @@ int write (int fd, const void *buffer, unsigned size){
 
 void seek (int fd, unsigned position){
 	if (!fd_validate(fd))
-		exit(-1);
+		return -1;
 	struct file* f = thread_current()->fdt[fd];
   file_seek (f, position);  
 }
 
 unsigned tell (int fd){
 	if (!fd_validate(fd))
-		exit(-1);
+		return -1;
 	struct file* f = thread_current()->fdt[fd];
 	return file_tell(f);
 }
 
 void close (int fd){
 	if (fd_validate(fd))
-		exit(-1);
+		return -1;
 	filelock_acquire();
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
