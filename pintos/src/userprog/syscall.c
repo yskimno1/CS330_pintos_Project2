@@ -308,7 +308,7 @@ int read (int fd, void *buffer, unsigned size){
 	filelock_acquire();
 
 	if (fd == 0){			//keyboard input
-		for (i=0; i<size i++) {
+		for (i=0; i<size; i++) {
 			// must be below PHYS_BASE. 
 			if (!is_user_vaddr(buffer+i)){
 				filelock_release();
