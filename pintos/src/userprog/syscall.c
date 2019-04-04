@@ -313,7 +313,7 @@ int read (int fd, void *buffer, unsigned size){
 			buffer_pointer[i] = input_getc();
 			cnt++;
 		}
-		return size
+		return size;
 	}
 
 	else {
