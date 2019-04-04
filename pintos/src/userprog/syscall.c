@@ -204,12 +204,18 @@ syscall_handler (struct intr_frame *f)
 
 uint32_t* 
 p_argv(void* addr){
-  if (addr==NULL)
+  if (addr==NULL){
+		printf("111111\n");
     exit(-1);
-  if (!is_user_vaddr(addr))
+	}
+  if (!is_user_vaddr(addr)){
+		printf("2222\n");
     exit(-1);
-	if(is_bad_pointer(addr))
+	}
+	if(is_bad_pointer(addr)){
+		printf("3333\n");
 		exit(-1);
+	}
   return (uint32_t *)(addr);
 }
 
@@ -396,9 +402,11 @@ int tell (int fd){
 }
 
 void close (int fd){
-	if (!fd_validate(fd))
+	if (!fd_validate(fd)){
+		printf("close\n");
 		exit(-1);
 		return;
+	}
 	filelock_acquire();
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
