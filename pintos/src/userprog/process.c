@@ -131,11 +131,14 @@ process_wait (tid_t child_tid)
   if(child_tid == TID_ERROR) return -1;
 
   struct thread* th_child;
+  int status;
   th_child = search_child(thread_current(), child_tid);
   if(th_child == NULL) return -1;
-  int status = th_child->exit_status;
+
   if(th_child->is_exited == false) sema_down(&thread_current()->sema_wait);
+
   list_remove(&th_child->elem_list_children);
+  status = th_child->exit_status;
   sema_up(&thread_current()->sema_exited);
   return status;
 }
