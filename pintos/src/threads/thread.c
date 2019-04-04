@@ -453,12 +453,10 @@ init_thread (struct thread *t, const char *name, int priority)
   sema_init(&t->sema_load, 0);
   sema_init(&t->sema_wait, 0);
   sema_init(&t->sema_exited, 0);
-#ifdef USERPROG
   int i;
   for (i=0; i++; i<131)
     t->fdt[i] = NULL;
   t->fd_vld = 3;    //0,1,2 invalid
-#endif 
   list_init(&t->list_children);
   t->th_parent = running_thread();
   t->is_loaded = false;

@@ -92,12 +92,11 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
-#ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
     struct file* fdt[131];              /* file descriptor table, max 128*/
     int fd_vld;                         /* vaild descriptor number for next open(fdt[fd_vld] == NULL) */
-#endif
+
     struct semaphore sema_load;
     struct semaphore sema_wait;
     struct semaphore sema_exited;

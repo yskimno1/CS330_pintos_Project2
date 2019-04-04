@@ -13,13 +13,12 @@
 #include "devices/input.h"
 #include "userprog/process.h"
 
-
 typedef int pid_t;
 
 static void syscall_handler (struct intr_frame *);
 static uint32_t* p_argv(void* addr);
 static void halt (void);
-void exit (int status);
+//void exit (int status);
 static pid_t exec (const char *file);
 static int wait (pid_t pid);
 static int create (const char *file, unsigned initial_size);
@@ -277,6 +276,7 @@ int open (const char *file){
   struct thread *t = thread_current();
   int fd = (t->fd_vld)++;
   t->fdt[fd] = f;
+  file_deny_write(f);
   filelock_release();
   return fd; 
 }
@@ -351,6 +351,10 @@ int write (int fd, const void *buffer, unsigned size){
 	filelock_acquire();
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
+  if (f->deny_wrtie == true){
+    exit(0);
+    return 0;
+  }
 	cnt = file_write(f, buffer, size);	
 	filelock_release();
 	return cnt;
