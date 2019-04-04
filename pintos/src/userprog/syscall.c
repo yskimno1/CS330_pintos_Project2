@@ -314,7 +314,7 @@ int read (int fd, void *buffer, unsigned size){
 				filelock_release();
 				return -1;
 			}
-			put_user((uint8_t *)(buffer+i), input_getc());	
+			//put_user((uint8_t *)(buffer+i), input_getc());	
 			cnt++;
 		}
 	}
