@@ -293,6 +293,7 @@ int filesize (int fd){
 }
 
 int read (int fd, void *buffer, unsigned size){
+	printf("read file. fd %d\n", fd);
 	int cnt=-1; unsigned i;
 	char* buffer_pointer = buffer;
 	if (!fd_validate(fd))

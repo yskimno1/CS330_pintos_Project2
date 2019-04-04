@@ -99,7 +99,7 @@ process_execute (const char *file_name)
 static void
 start_process (void *f_name)
 {
-  printf("start process, filename %s\n", f_name);
+  // printf("start process, filename %s\n", f_name);
   char *file_name = f_name;
   struct intr_frame if_;
   bool success;
@@ -146,7 +146,7 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid) 
 {
-  printf("process_wait for tid %d\n", child_tid);
+  // printf("process_wait for tid %d\n", child_tid);
   if(child_tid == TID_ERROR) return -1;
 
   struct thread* th_child;
