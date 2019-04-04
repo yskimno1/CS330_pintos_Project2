@@ -162,7 +162,7 @@ process_wait (tid_t child_tid)
   list_remove(&th_child->elem_list_children);
   status = th_child->exit_status;
   sema_up(&thread_current()->sema_exited);
-  printf("process wait done, status %d with pid %d\n", status, pid);
+  printf("process wait done, status %d with pid %d\n", status, child_pid);
   return status;
 }
 
