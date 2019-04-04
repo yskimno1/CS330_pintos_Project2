@@ -294,6 +294,7 @@ int filesize (int fd){
 
 int read (int fd, void *buffer, unsigned size){
 	int cnt=-1; unsigned i;
+	char* buffer_pointer = buffer;
 	if (!fd_validate(fd))
 		return -1;
 
@@ -309,14 +310,10 @@ int read (int fd, void *buffer, unsigned size){
 
 	if (fd == 0){			//keyboard input
 		for (i=0; i<size; i++) {
-			// must be below PHYS_BASE. 
-			if (!is_user_vaddr(buffer+i)){
-				filelock_release();
-				return -1;
-			}
-			//put_user((uint8_t *)(buffer+i), input_getc());	
+			buffer_pointer[i] = input_getc();
 			cnt++;
 		}
+		return size
 	}
 
 	else {
