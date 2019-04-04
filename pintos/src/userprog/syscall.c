@@ -279,7 +279,7 @@ int open (const char *file){
 
 int filesize (int fd){
   if (!fd_validate(fd)){
-    filelock_release();
+    // filelock_release();
     return -1;
   }
 	return file_length(thread_current()->fdt[fd]);
