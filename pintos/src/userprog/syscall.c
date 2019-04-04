@@ -357,7 +357,7 @@ int write (int fd, const void *buffer, unsigned size){
 	filelock_acquire();
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
-  if (f->deny_wrtie == true){
+  if (f->deny_write == true){
     exit(0);
     return 0;
   }
