@@ -73,7 +73,6 @@ process_execute (const char *file_name)
   }
   struct thread* th_child = search_child(thread_current, tid);
   if(th_child == NULL){
-    printf("here");
     return -1;
   }
   else if(!(th_child->is_loaded)){
