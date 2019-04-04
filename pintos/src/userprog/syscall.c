@@ -299,7 +299,7 @@ int read (int fd, void *buffer, unsigned size){
 		return -1;
 
   if (!string_validate(buffer)){
-		print("ffff1");
+		printf("ffff1");
 		exit(-1);
     return -1;
 	}
