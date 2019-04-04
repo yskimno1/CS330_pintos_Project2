@@ -349,16 +349,17 @@ int write (int fd, const void *buffer, unsigned size){
 		exit(-1);
 		return -1;
 	}
+  filelock_acquire();
 	if (fd == 1){
 		putbuf (buffer, size);
+    filelock_release();
     return size;  
 	}
 	// else
-	filelock_acquire();
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
   if (f->deny_write == true){
-    exit(0);
+    filelock_release();
     return 0;
   }
 	cnt = file_write(f, buffer, size);	
