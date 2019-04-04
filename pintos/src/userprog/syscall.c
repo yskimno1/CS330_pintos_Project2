@@ -311,8 +311,8 @@ int read (int fd, void *buffer, unsigned size){
 	if (fd == 0){			//keyboard input
 		for (i=0; i<size; i++) {
 			buffer_pointer[i] = input_getc();
-			cnt++;
 		}
+		cnt=size;
 		filelock_release();
 		return size;
 	}
