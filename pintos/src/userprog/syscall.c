@@ -282,7 +282,8 @@ int open (const char *file){
   struct thread *t = thread_current();
   int fd = (t->fd_vld)++;
   t->fdt[fd] = f;
-  file_deny_write(f);
+  if (!strcmp(t->name, file)) 
+      file_deny_write(f);
   filelock_release();
   return fd; 
 }
