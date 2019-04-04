@@ -313,6 +313,7 @@ int read (int fd, void *buffer, unsigned size){
 			buffer_pointer[i] = input_getc();
 			cnt++;
 		}
+		filelock_release();
 		return size;
 	}
 
