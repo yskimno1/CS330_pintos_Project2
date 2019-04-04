@@ -168,9 +168,10 @@ process_exit (void)
   uint32_t *pd;
 
   curr->is_exited = true;
+  sema_down(&curr->th_parent->sema_exited);
   sema_up(&curr->th_parent->sema_wait);
   /* wait until parent removes the child in the list */
-  sema_down(&curr->th_parent->sema_exited);
+  //sema_down(&curr->th_parent->sema_exited);
 
   /* Destroy the current process's page directory and switch back
     to the kernel-only page directory. */
