@@ -47,7 +47,6 @@ search_child (struct thread* th, tid_t tid){
 tid_t
 process_execute (const char *file_name) 
 {
-  printf("process execute. filename %s\n", file_name);
   char *fn_copy;
   tid_t tid;
 
