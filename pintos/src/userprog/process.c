@@ -70,13 +70,16 @@ process_execute (const char *file_name)
   free(filename_copy);
   if (tid == TID_ERROR){
     palloc_free_page (fn_copy);
+    printf("!1111\n");
     return -1;
   }
   struct thread* th_child = search_child(thread_current, tid);
   if(th_child == NULL){
+    printf("2222\n");
     return -1;
   }
   else if(!(th_child->is_loaded)){
+    printf("33333\n");
     return -1;
   }
   // struct list_elem* e;
@@ -90,7 +93,7 @@ process_execute (const char *file_name)
   //   }
   // }
   /* if success, wait until child ends */
-
+  printf("4444\n");
   return tid;
 }
 
@@ -159,6 +162,7 @@ process_wait (tid_t child_tid)
   list_remove(&th_child->elem_list_children);
   status = th_child->exit_status;
   sema_up(&thread_current()->sema_exited);
+  printf("55555\n");
   return status;
 }
 

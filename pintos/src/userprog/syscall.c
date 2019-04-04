@@ -59,39 +59,31 @@ syscall_handler (struct intr_frame *f)
     return;
   }
   int syscall_func = *(uint32_t* )if_esp;
-  // printf ("system call! %d\n", syscall_func);
-	//int result;
-	//bool result_bool;
   uint32_t argv0;
   uint32_t argv1;
   uint32_t argv2;
   switch(syscall_func)
   	{
  		case SYS_HALT:		/* Halt the operating system. */
-    	//printf("SYS_HALT\n");
     	halt();
   		break;
 
   	case SYS_EXIT:		/* Terminate this process. */
-  		//printf("SYS_EXIT\n");
   		argv0 = *p_argv(if_esp+4);
   		exit((int)argv0);
   		break;
 
   	case SYS_EXEC:		/* Start another process. */
-  		// printf("SYS_EXEC\n");
   		argv0 = *p_argv(if_esp+4);
   		f->eax = (uint32_t) exec((const char *)argv0);
   		break;
 
   	case SYS_WAIT:		/* Wait for a child process to die. */
-  		// printf("SYS_WAIT\n");
   		argv0 = *p_argv(if_esp+4);
   		f->eax = wait((pid_t)argv0);
   		break;
 
   	case SYS_CREATE:	/* Create a file. */
-  		// printf("SYS_CREATE\n");
   		argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
 
@@ -99,7 +91,6 @@ syscall_handler (struct intr_frame *f)
 			int result = create((const char*)argv0, (unsigned)argv1);
 			filelock_release();
 			if(result == -1){
-				printf("create\n");
 				exit(-1);
 				break;
 			}
@@ -109,13 +100,11 @@ syscall_handler (struct intr_frame *f)
 			}
 
   	case SYS_REMOVE:	/* Delete a file. */
-  		// printf("SYS_REMOVE\n");
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
 			result = temp_remove((const char* )argv0);
 			filelock_release();
 			if(result == -1){
-				printf("remove\n");
 				exit(-1);
 				break;
 			}
@@ -125,20 +114,17 @@ syscall_handler (struct intr_frame *f)
 			}
 
   	case SYS_OPEN:		/* Open a file. */
-  		// printf("SYS_OPEN\n");
   		argv0 = *p_argv(if_esp+4);
 			result = open((const char *)argv0);
 			f->eax = result;
 			break;
 
   	case SYS_FILESIZE:/* Obtain a file's size. */
-  		// printf("SYS_FILESIZE\n");
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
 			result = filesize((int)argv0);
 			filelock_release();
 			if(result == -1){
-				printf("filesize\n");
 				exit(-1);
 				break;
 			}
@@ -148,26 +134,22 @@ syscall_handler (struct intr_frame *f)
 			}
 
   	case SYS_READ:		/* Read from a file. */
-  		//printf("SYS_READ\n");
   		argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
       argv2 = *p_argv(if_esp+12);
 			f->eax = read((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
   	case SYS_WRITE:		/* Write to a file. */
-  		// printf("SYS_WRITE\n");
       argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
       argv2 = *p_argv(if_esp+12);
   		f->eax = write((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
   	case SYS_SEEK:		/* Change position in a file. */
-  		// printf("SYS_SEEK\n");
       argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
 			seek((int)argv0, (unsigned)argv1);
 			if(result == -1){
-				printf("seek\n");
 				exit(-1);
 				break;
 			}
@@ -177,11 +159,9 @@ syscall_handler (struct intr_frame *f)
 			}
 
   	case SYS_TELL:		/* Report current position in a file. */
-  		// printf("SYS_TELL\n");
   		argv0 = *p_argv(if_esp+4);
 			result = tell((int)argv0);
 			if(result == -1){
-				printf("tell\n");
 				exit(-1);
 				break;
 			}
@@ -191,13 +171,11 @@ syscall_handler (struct intr_frame *f)
 			}
 
   	case SYS_CLOSE:
-  		// printf("SYS_CLOSE\n");
   		argv0 = *p_argv(if_esp+4);
 
 			close((int)argv0);
 
   	default:
-  		// printf("NONE\n");
   		break;
   	}
 }
@@ -205,15 +183,12 @@ syscall_handler (struct intr_frame *f)
 uint32_t* 
 p_argv(void* addr){
   if (addr==NULL){
-		printf("111111\n");
     exit(-1);
 	}
   if (!is_user_vaddr(addr)){
-		printf("2222\n");
     exit(-1);
 	}
 	if(is_bad_pointer(addr)){
-		printf("3333\n");
 		exit(-1);
 	}
   return (uint32_t *)(addr);
@@ -247,7 +222,6 @@ exit (int status){
 pid_t 
 exec (const char *cmd_line){
   if (!string_validate(cmd_line)){
-		printf("exec\n");
     exit(-1);
 	}
 	tid_t pid = process_execute (cmd_line);
@@ -313,12 +287,10 @@ int read (int fd, void *buffer, unsigned size){
 		return -1;
 
   if (!string_validate(buffer)){
-		printf("here\n");
 		exit(-1);
     return -1;
 	}
 	if (is_bad_pointer(buffer+size)){
-		printf("there\n");
 		exit(-1);
 		return -1;
 	}
@@ -353,19 +325,16 @@ int write (int fd, const void *buffer, unsigned size){
   }
   if (!string_validate(buffer)){
 		filelock_release();
-		printf("111\n");
 		exit(-1);
     return cnt;
 	}
 	if (is_bad_pointer(buffer+size)){
 		filelock_release();
-		printf("222\n");
 		exit(-1);
 		return -1;
 	}
 	if (fd ==0){
 		filelock_release();
-		printf("333\n");
 		exit(-1);
 		return -1;
 	}
@@ -403,7 +372,6 @@ int tell (int fd){
 
 void close (int fd){
 	if (!fd_validate(fd)){
-		printf("close\n");
 		exit(-1);
 		return;
 	}
