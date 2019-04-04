@@ -64,14 +64,14 @@ process_execute (const char *file_name)
 
   /* Create a new thread to execute FUNC_NAME. */
   tid = thread_create (func_name, PRI_DEFAULT, start_process, fn_copy);
-
+  sema_down(&thread_current()->sema_load);
   free(filename_copy);
   if (tid == TID_ERROR){
     palloc_free_page (fn_copy);
     return -1;
   }
   /* if success, wait until child ends */
-  sema_down(&thread_current()->sema_load);
+
   struct thread* th_child = search_child(thread_current, tid);
   if(th_child == NULL) return -1;
   return tid;
@@ -95,12 +95,12 @@ start_process (void *f_name)
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
-  sema_up(&thread_current()->th_parent->sema_load);
   if (!success){
     thread_current()->is_loaded = false;
     thread_exit ();
   }
   else thread_current()->is_loaded = true;
+  sema_up(&thread_current()->th_parent->sema_load);
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
      threads/intr-stubs.S).  Because intr_exit takes all of its
