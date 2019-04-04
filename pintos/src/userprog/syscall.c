@@ -339,6 +339,10 @@ int write (int fd, const void *buffer, unsigned size){
 		exit(-1);
 		return -1;
 	}
+	if (fd ==0){
+		exit(-1);
+		return -1;
+	}
 	if (fd == 1){
 		putbuf (buffer, size);
     return size;  
