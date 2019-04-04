@@ -76,7 +76,7 @@ process_execute (const char *file_name)
     for(e=list_begin(&thread_current()->list_children); e!=list_end(&thread_current()->list_children); e = list_next(e)){
       th_child_list = list_entry(e, struct thread, elem_list_children);
       if(th_child_list->is_exited == true){
-        return process_wait(th_child_list->tid);
+        return process_wait(tid);
       }
     }
   }
