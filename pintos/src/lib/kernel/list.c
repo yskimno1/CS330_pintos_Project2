@@ -46,6 +46,12 @@ is_head (struct list_elem *elem)
 static inline bool
 is_interior (struct list_elem *elem)
 {
+  if (elem == NULL)
+    printf("1\n");
+  if (elem ->prev == NULL)
+    printf("2\n");
+  if (elem->next == NULL)
+    printf("3\n");
   return elem != NULL && elem->prev != NULL && elem->next != NULL;
 }
 
