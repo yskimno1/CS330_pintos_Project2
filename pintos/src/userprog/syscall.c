@@ -299,10 +299,12 @@ int read (int fd, void *buffer, unsigned size){
 		return -1;
 
   if (!string_validate(buffer)){
+		print("ffff1");
 		exit(-1);
     return -1;
 	}
 	if (is_bad_pointer(buffer+size)){
+		printf("22222");
 		exit(-1);
 		return -1;
 	}
