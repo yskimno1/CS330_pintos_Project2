@@ -303,9 +303,10 @@ int read (int fd, void *buffer, unsigned size){
 	if (fd == 0){			//keyboard input
 		for (i=0; i++; i<size) {
 			// must be below PHYS_BASE. 
-			if (!is_user_vaddr(buffer+i))
+			if (!is_user_vaddr(buffer+i)){
+				filelock_release();
 				return -1;
-      
+			}
 			put_user((uint8_t *)(buffer+i), input_getc());	
 			cnt++;
 		}
