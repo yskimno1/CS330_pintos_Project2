@@ -99,6 +99,7 @@ syscall_handler (struct intr_frame *f)
 			int result = create((const char*)argv0, (unsigned)argv1);
 			filelock_release();
 			if(result == -1){
+				printf("create\n");
 				exit(-1);
 				break;
 			}
@@ -114,6 +115,7 @@ syscall_handler (struct intr_frame *f)
 			result = temp_remove((const char* )argv0);
 			filelock_release();
 			if(result == -1){
+				printf("remove\n");
 				exit(-1);
 				break;
 			}
@@ -136,6 +138,7 @@ syscall_handler (struct intr_frame *f)
 			result = filesize((int)argv0);
 			filelock_release();
 			if(result == -1){
+				printf("filesize\n");
 				exit(-1);
 				break;
 			}
@@ -164,6 +167,7 @@ syscall_handler (struct intr_frame *f)
       argv1 = *p_argv(if_esp+8);
 			seek((int)argv0, (unsigned)argv1);
 			if(result == -1){
+				printf("seek\n");
 				exit(-1);
 				break;
 			}
@@ -177,6 +181,7 @@ syscall_handler (struct intr_frame *f)
   		argv0 = *p_argv(if_esp+4);
 			result = tell((int)argv0);
 			if(result == -1){
+				printf("tell\n");
 				exit(-1);
 				break;
 			}
@@ -235,8 +240,10 @@ exit (int status){
 
 pid_t 
 exec (const char *cmd_line){
-  if (!string_validate(cmd_line))
+  if (!string_validate(cmd_line)){
+		printf("exec\n");
     exit(-1);
+	}
 	tid_t pid = process_execute (cmd_line);
   return pid;
 }
@@ -293,17 +300,19 @@ int filesize (int fd){
 }
 
 int read (int fd, void *buffer, unsigned size){
-	printf("read file. fd %d\n", fd);
+	// printf("read file. fd %d\n", fd);
 	int cnt=-1; unsigned i;
 	char* buffer_pointer = buffer;
 	if (!fd_validate(fd))
 		return -1;
 
   if (!string_validate(buffer)){
+		printf("here\n");
 		exit(-1);
     return -1;
 	}
 	if (is_bad_pointer(buffer+size)){
+		printf("there\n");
 		exit(-1);
 		return -1;
 	}
@@ -338,16 +347,19 @@ int write (int fd, const void *buffer, unsigned size){
   }
   if (!string_validate(buffer)){
 		filelock_release();
+		printf("111\n");
 		exit(-1);
     return cnt;
 	}
 	if (is_bad_pointer(buffer+size)){
 		filelock_release();
+		printf("222\n");
 		exit(-1);
 		return -1;
 	}
 	if (fd ==0){
 		filelock_release();
+		printf("333\n");
 		exit(-1);
 		return -1;
 	}
