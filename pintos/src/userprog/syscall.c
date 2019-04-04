@@ -112,12 +112,8 @@ syscall_handler (struct intr_frame *f)
 				exit(-1);
 				break;
 			}
-			else if(result == true){
-				f->eax = false;
-				break;
-			}
 			else{
-				f->eax = true;
+				f->eax = (bool)result;
 				break;
 			}
 
