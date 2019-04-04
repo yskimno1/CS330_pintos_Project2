@@ -299,12 +299,10 @@ int read (int fd, void *buffer, unsigned size){
 		return -1;
 
   if (!string_validate(buffer)){
-		printf("ffff1");
 		exit(-1);
     return -1;
 	}
 	if (is_bad_pointer(buffer+size)){
-		printf("22222");
 		exit(-1);
 		return -1;
 	}
@@ -331,23 +329,28 @@ int read (int fd, void *buffer, unsigned size){
 }
 
 int write (int fd, const void *buffer, unsigned size){
+	filelock_acquire();
   int cnt=-1;
   if (!fd_validate(fd)){
+		filelock_release();
   	return cnt;
   }
   if (!string_validate(buffer)){
+		filelock_release();
 		exit(-1);
     return cnt;
 	}
 	if (is_bad_pointer(buffer+size)){
+		filelock_release();
 		exit(-1);
 		return -1;
 	}
 	if (fd ==0){
+		filelock_release();
 		exit(-1);
 		return -1;
 	}
-  filelock_acquire();
+
 	if (fd == 1){
 		putbuf (buffer, size);
     filelock_release();

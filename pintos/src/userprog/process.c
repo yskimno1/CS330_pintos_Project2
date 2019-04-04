@@ -65,26 +65,32 @@ process_execute (const char *file_name)
   /* Create a new thread to execute FUNC_NAME. */
   tid = thread_create (func_name, PRI_DEFAULT, start_process, fn_copy);
   sema_down(&thread_current()->sema_load);
+
   free(filename_copy);
   if (tid == TID_ERROR){
     palloc_free_page (fn_copy);
     return -1;
   }
-
-  struct list_elem* e;
-  struct thread* th_child_list;
-  if(!list_empty(&thread_current()->list_children)){
-    for(e=list_begin(&thread_current()->list_children); e!=list_end(&thread_current()->list_children); e = list_next(e)){
-      th_child_list = list_entry(e, struct thread, elem_list_children);
-      if(th_child_list->is_loaded == false){
-        return process_wait(tid);
-      }
-    }
+  struct thread* th_child = search_child(thread_current, tid);
+  if(th_child == NULL){
+    printf("here");
+    return -1;
   }
+  else if(!(th_child->is_loaded)){
+    return -1;
+  }
+  // struct list_elem* e;
+  // struct thread* th_child_list;
+  // if(!list_empty(&thread_current()->list_children)){
+  //   for(e=list_begin(&thread_current()->list_children); e!=list_end(&thread_current()->list_children); e = list_next(e)){
+  //     th_child_list = list_entry(e, struct thread, elem_list_children);
+  //     if(th_child_list->is_loaded == false){
+  //       return process_wait(tid);
+  //     }
+  //   }
+  // }
   /* if success, wait until child ends */
 
-  struct thread* th_child = search_child(thread_current, tid);
-  if(th_child == NULL) return -1;
   return tid;
 }
 
