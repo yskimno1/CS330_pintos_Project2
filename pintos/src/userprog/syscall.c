@@ -306,14 +306,12 @@ int read (int fd, void *buffer, unsigned size){
 		exit(-1);
 		return -1;
 	}
-	filelock_acquire();
 
 	if (fd == 0){			//keyboard input
 		for (i=0; i<size; i++) {
 			buffer_pointer[i] = input_getc();
 		}
 		cnt=size;
-		filelock_release();
 		return size;
 	}
 
@@ -321,10 +319,12 @@ int read (int fd, void *buffer, unsigned size){
 		struct thread* t = thread_current();
 		if (t->fdt[fd]==NULL)
 			cnt = -1;
-		else
+		else{
+			filelock_acquire();
 			cnt = file_read(t->fdt[fd], buffer, size);
+			filelock_release();
+		}
 	}	
-	filelock_release();
 	return cnt;
 }
 
