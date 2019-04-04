@@ -47,6 +47,7 @@ search_child (struct thread* th, tid_t tid){
 tid_t
 process_execute (const char *file_name) 
 {
+  printf("process execute. filename %s\n", file_name);
   char *fn_copy;
   tid_t tid;
 
@@ -98,6 +99,7 @@ process_execute (const char *file_name)
 static void
 start_process (void *f_name)
 {
+  printf("start process, filename %s\n", f_name);
   char *file_name = f_name;
   struct intr_frame if_;
   bool success;
@@ -144,6 +146,7 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid) 
 {
+  printf("process_wait for tid %d\n", child_tid);
   if(child_tid == TID_ERROR) return -1;
 
   struct thread* th_child;
