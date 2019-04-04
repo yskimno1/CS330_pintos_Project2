@@ -155,6 +155,7 @@ page_fault (struct intr_frame *f)
 //     return;
 //   }
 //   thread_exit();
+  printf("pagefault..\n");
   exit(-1);
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
