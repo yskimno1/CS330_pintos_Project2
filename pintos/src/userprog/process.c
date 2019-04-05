@@ -34,8 +34,11 @@ search_child (struct thread* th, tid_t tid){
   struct list_elem* e;
   struct thread* th_child;
   if(!list_empty(&thread_current()->list_children)){
+    printf("search start\n");
     for(e=list_begin(&thread_current()->list_children); e!=list_end(&thread_current()->list_children); e = list_next(e)){
+      printf("searching child in for loop\n");
       th_child = list_entry(e, struct thread, elem_list_children);
+      printf("child address during search : %X\n", th_child);
       if(th_child->tid == tid) break;
     }
     if(th_child->is_loaded == false) return NULL;
