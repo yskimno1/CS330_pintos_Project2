@@ -52,7 +52,6 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   tid_t tid;
-  printf("process execute\n");
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -100,7 +99,6 @@ process_execute (const char *file_name)
 static void
 start_process (void *f_name)
 {
-  printf("start process\n");
   // printf("start process, filename %s\n", f_name);
   char *file_name = f_name;
   struct intr_frame if_;
@@ -148,7 +146,6 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid) 
 {
-  printf("process wait\n");
   // printf("process_wait for tid %d\n", child_tid);
   if(child_tid == TID_ERROR) return -1;
 
@@ -158,7 +155,8 @@ process_wait (tid_t child_tid)
   printf("th_child address : %X\n", th_child);
   if(th_child == NULL) return -1;
 
-  if(th_child->is_exited == false) sema_down(&thread_current()->sema_wait);
+
+  sema_down(&thread_current()->sema_wait);
 
   list_remove(&th_child->elem_list_children);
   status = th_child->exit_status;
