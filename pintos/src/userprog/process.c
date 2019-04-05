@@ -34,11 +34,8 @@ search_child (struct thread* th, tid_t tid){
   struct list_elem* e;
   struct thread* th_child;
   if(!list_empty(&thread_current()->list_children)){
-    printf("search start\n");
     for(e=list_begin(&thread_current()->list_children); e!=list_end(&thread_current()->list_children); e = list_next(e)){
-      printf("searching child in for loop\n");
       th_child = list_entry(e, struct thread, elem_list_children);
-      printf("child address during search : %X\n", th_child);
       if(th_child->tid == tid) break;
     }
     if(th_child->is_loaded == false) return NULL;
@@ -99,7 +96,6 @@ process_execute (const char *file_name)
 static void
 start_process (void *f_name)
 {
-  // printf("start process, filename %s\n", f_name);
   char *file_name = f_name;
   struct intr_frame if_;
   bool success;
@@ -146,21 +142,16 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid) 
 {
-  // printf("process_wait for tid %d\n", child_tid);
   if(child_tid == TID_ERROR) return -1;
 
   struct thread* th_child;
   int status;
   th_child = search_child(thread_current(), child_tid);
-  printf("th_child address : %X\n", th_child);
   if(th_child == NULL) return -1;
 
-
   sema_down(&thread_current()->sema_wait);
-
   list_remove(&th_child->elem_list_children);
   status = th_child->exit_status;
-  printf("th_child exit address : %X\n", &(th_child->exit_status));
   sema_up(&thread_current()->sema_exited);
   return status;
 }
@@ -203,7 +194,6 @@ process_exit (void)
 void
 process_activate (void)
 {
-  printf("process activate\n");
   struct thread *t = thread_current ();
 
   /* Activate thread's page tables. */
@@ -290,7 +280,6 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
 bool
 load (const char *file_name, void (**eip) (void), void **esp) 
 {
-  printf("load\n");
   struct thread *t = thread_current ();
   struct Elf32_Ehdr ehdr;
   struct file *file = NULL;
@@ -372,7 +361,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
         case PT_LOAD:
           if (validate_segment (&phdr, file)) 
             {
-              printf("in valid segment\n");
               bool writable = (phdr.p_flags & PF_W) != 0;
               uint32_t file_page = phdr.p_offset & ~PGMASK;
               uint32_t mem_page = phdr.p_vaddr & ~PGMASK;
@@ -429,7 +417,6 @@ static bool install_page (void *upage, void *kpage, bool writable);
 static bool
 validate_segment (const struct Elf32_Phdr *phdr, struct file *file) 
 {
-  printf("validate segment\n");
   /* p_offset and p_vaddr must have the same page offset. */
   if ((phdr->p_offset & PGMASK) != (phdr->p_vaddr & PGMASK)) 
     return false; 
@@ -488,7 +475,6 @@ static bool
 load_segment (struct file *file, off_t ofs, uint8_t *upage,
               uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
 {
-  printf("load segment\n");
   ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
   ASSERT (pg_ofs (upage) == 0);
   ASSERT (ofs % PGSIZE == 0);
@@ -535,7 +521,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 static bool
 setup_stack (void **esp, int argc, void** argv) 
 {
-  printf("setup stack\n");
   uint8_t *kpage;
   bool success = false;
 
@@ -604,7 +589,6 @@ setup_stack (void **esp, int argc, void** argv)
 static bool
 install_page (void *upage, void *kpage, bool writable)
 {
-  printf("install_page\n");
   struct thread *t = thread_current ();
 
   /* Verify that there's not already a page at that virtual

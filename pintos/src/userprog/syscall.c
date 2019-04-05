@@ -191,7 +191,6 @@ p_argv(void* addr){
     exit(-1);
 	}
 	if(is_bad_pointer(addr)){
-		printf("bad! %X\n",addr);
 		exit(-1);
 	}
   return (uint32_t *)(addr);
@@ -283,7 +282,6 @@ int filesize (int fd){
 }
 
 int read (int fd, void *buffer, unsigned size){
-	// printf("read file. fd %d\n", fd);
 	filelock_acquire();
 	int cnt=-1; unsigned i;
 	char* buffer_pointer = buffer;
