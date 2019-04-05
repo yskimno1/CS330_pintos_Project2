@@ -152,12 +152,14 @@ process_wait (tid_t child_tid)
   struct thread* th_child;
   int status;
   th_child = search_child(thread_current(), child_tid);
+  printf("th_child address : %X\n", th_child);
   if(th_child == NULL) return -1;
 
   if(th_child->is_exited == false) sema_down(&thread_current()->sema_wait);
 
   list_remove(&th_child->elem_list_children);
   status = th_child->exit_status;
+  printf("th_child exit address : %X\n", &(th_child->exit_status));
   sema_up(&thread_current()->sema_exited);
   return status;
 }
