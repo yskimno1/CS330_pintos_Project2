@@ -189,6 +189,7 @@ p_argv(void* addr){
     exit(-1);
 	}
 	if(is_bad_pointer(addr)){
+		printf("bad! %X\n",addr);
 		exit(-1);
 	}
   return (uint32_t *)(addr);
