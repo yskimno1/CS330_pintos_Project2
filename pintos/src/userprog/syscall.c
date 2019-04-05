@@ -52,8 +52,6 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f) 
 {
-	int* temp = 0xccccca40;
-	printf("that mem : %d", *temp);
   void* if_esp = f->esp;
   if(is_kernel_vaddr(if_esp)){ // have to change yunseong
     thread_exit(); // exit(-1), page fault, more... yunseong
