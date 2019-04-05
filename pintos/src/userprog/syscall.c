@@ -199,6 +199,13 @@ halt (void){
 	power_off();
 }
 
+void
+exit_pagefault (int status){
+	struct thread* t = thread_current();
+	t->exit_status = status;
+	
+}
+
 void 
 exit (int status){
   struct thread* t = thread_current();
@@ -266,7 +273,7 @@ int open (const char *file){
   int fd = (t->fd_vld)++;
   t->fdt[fd] = f;
   if (!strcmp(t->name, file)) 
-      file_deny_write(f);
+      // file_deny_write(f);
   filelock_release();
   return fd; 
 }
@@ -281,16 +288,20 @@ int filesize (int fd){
 
 int read (int fd, void *buffer, unsigned size){
 	// printf("read file. fd %d\n", fd);
+	filelock_acquire();
 	int cnt=-1; unsigned i;
 	char* buffer_pointer = buffer;
-	if (!fd_validate(fd))
+	if (!fd_validate(fd)){
+		filelock_release();
 		return -1;
-
+	}
   if (!string_validate(buffer)){
+		filelock_release();
 		exit(-1);
     return -1;
 	}
 	if (is_bad_pointer(buffer+size)){
+		filelock_release();
 		exit(-1);
 		return -1;
 	}
@@ -300,6 +311,7 @@ int read (int fd, void *buffer, unsigned size){
 			buffer_pointer[i] = input_getc();
 		}
 		cnt=size;
+		filelock_release();
 		return size;
 	}
 
@@ -308,11 +320,10 @@ int read (int fd, void *buffer, unsigned size){
 		if (t->fdt[fd]==NULL)
 			cnt = -1;
 		else{
-			filelock_acquire();
 			cnt = file_read(t->fdt[fd], buffer, size);
-			filelock_release();
 		}
-	}	
+	}
+	filelock_release();
 	return cnt;
 }
 
@@ -347,10 +358,10 @@ int write (int fd, const void *buffer, unsigned size){
 	// else
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
-  if (f->deny_write == true){
-    filelock_release();
-    return 0;
-  }
+  // if (f->deny_write == true){
+  //   filelock_release();
+  //   return 0;
+  // }
 	cnt = file_write(f, buffer, size);	
 	filelock_release();
 	return cnt;
