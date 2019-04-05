@@ -36,6 +36,7 @@ search_child (struct thread* th, tid_t tid){
   if(!list_empty(&thread_current()->list_children)){
     for(e=list_begin(&thread_current()->list_children); e!=list_end(&thread_current()->list_children); e = list_next(e)){
       th_child = list_entry(e, struct thread, elem_list_children);
+      printf("child address : %x\n", th_child);
       if(th_child->tid == tid) break;
     }
     if(th_child->is_loaded == false) return NULL;
