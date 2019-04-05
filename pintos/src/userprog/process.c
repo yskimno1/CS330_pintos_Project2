@@ -150,10 +150,11 @@ process_wait (tid_t child_tid)
   th_child = search_child(thread_current(), child_tid);
   if(th_child == NULL) return -1;
 
-  sema_down(&thread_current()->sema_wait);
+  sema_down(&th_child->sema_wait);
+  th_child = search_child(thread_current(),child_tid);
   list_remove(&th_child->elem_list_children);
   status = th_child->exit_status;
-  sema_up(&thread_current()->sema_exited);
+  sema_up(&th_child->sema_exited);
   return status;
 }
 
@@ -165,9 +166,9 @@ process_exit (void)
   uint32_t *pd;
 
   curr->is_exited = true;
-  sema_up(&curr->th_parent->sema_wait);
+  sema_up(&curr->sema_wait);
   /* wait until parent removes the child in the list */
-  sema_down(&curr->th_parent->sema_exited);
+  sema_down(&curr->sema_exited);
 
   /* Destroy the current process's page directory and switch back
     to the kernel-only page directory. */
