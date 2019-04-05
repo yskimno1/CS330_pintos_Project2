@@ -52,6 +52,8 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f) 
 {
+	void* temp = 0xccccca40;
+	printf("that mem : %d", *temp);
   void* if_esp = f->esp;
   if(is_kernel_vaddr(if_esp)){ // have to change yunseong
     thread_exit(); // exit(-1), page fault, more... yunseong
@@ -139,12 +141,14 @@ syscall_handler (struct intr_frame *f)
       argv2 = *p_argv(if_esp+12);
 			f->eax = read((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
+
   	case SYS_WRITE:		/* Write to a file. */
       argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
       argv2 = *p_argv(if_esp+12);
   		f->eax = write((int)argv0, (void *)argv1, (unsigned)argv2);
   		break;
+
   	case SYS_SEEK:		/* Change position in a file. */
       argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
