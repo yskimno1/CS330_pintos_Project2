@@ -29,6 +29,7 @@ static bool load (const char *cmdline, void (**eip) (void), void **esp);
    before process_execute() returns.  Returns the new process's
    thread id, or TID_ERROR if the thread cannot be created. */
 
+/* Search the specific child */
 static struct thread*
 search_child (struct thread* th, tid_t tid){
   struct list_elem* e;
@@ -36,7 +37,6 @@ search_child (struct thread* th, tid_t tid){
   if(!list_empty(&thread_current()->list_children)){
     for(e=list_begin(&thread_current()->list_children); e!=list_end(&thread_current()->list_children); e = list_next(e)){
       th_child = list_entry(e, struct thread, elem_list_children);
-      // printf("child address : %x\n", th_child);
       if(th_child->tid == tid) break;
     }
     if(th_child->is_loaded == false) return NULL;
@@ -78,16 +78,7 @@ process_execute (const char *file_name)
   else if(!(th_child->is_loaded)){
     return -1;
   }
-  // struct list_elem* e;
-  // struct thread* th_child_list;
-  // if(!list_empty(&thread_current()->list_children)){
-  //   for(e=list_begin(&thread_current()->list_children); e!=list_end(&thread_current()->list_children); e = list_next(e)){
-  //     th_child_list = list_entry(e, struct thread, elem_list_children);
-  //     if(th_child_list->is_loaded == false){
-  //       return process_wait(tid);
-  //     }
-  //   }
-  // }
+
   /* if success, wait until child ends */
   return tid;
 }
@@ -402,7 +393,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   *eip = (void (*) (void)) ehdr.e_entry;
 
   success = true;
-  // file_deny_write(file);
+
  done:
   /* We arrive here whether the load is successful or not. */
   file_close (file);
@@ -411,7 +402,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
 }
 
 /* load() helpers. */
-
 static bool install_page (void *upage, void *kpage, bool writable);
 
 /* Checks whether PHDR describes a valid, loadable segment in

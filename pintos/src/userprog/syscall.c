@@ -24,11 +24,10 @@ typedef int pid_t;
 static void syscall_handler (struct intr_frame *);
 static uint32_t* p_argv(void* addr);
 static void halt (void);
-//void exit (int status);
 static pid_t exec (const char *file);
 static int wait (pid_t pid);
 static int create (const char *file, unsigned initial_size);
-static int temp_remove (const char *file);
+static int remove (const char *file);
 static int open (const char *file);
 static int filesize (int fd);
 static int read (int fd, void *buffer, unsigned size);
@@ -36,8 +35,6 @@ static int write (int fd, const void *buffer, unsigned size);
 static void seek (int fd, unsigned position);
 static int tell (int fd);
 static void close (int fd);
-static bool put_user (uint8_t *udst, uint8_t byte);
-static int32_t get_user (const uint8_t *uaddr);
 static bool fd_validate(int fd);
 static bool string_validate(const char* ptr);
 static bool is_bad_pointer(const char* ptr);
@@ -53,11 +50,11 @@ static void
 syscall_handler (struct intr_frame *f) 
 {
   void* if_esp = f->esp;
-  if(is_kernel_vaddr(if_esp)){ // have to change yunseong
-    thread_exit(); // exit(-1), page fault, more... yunseong
-    // have to consider malloced memory or lock
+  if(is_kernel_vaddr(if_esp)){
+    thread_exit(); 
     return;
   }
+
   int syscall_func = *(uint32_t* )if_esp;
   uint32_t argv0;
   uint32_t argv1;
@@ -102,7 +99,7 @@ syscall_handler (struct intr_frame *f)
   	case SYS_REMOVE:	/* Delete a file. */
   		argv0 = *p_argv(if_esp+4);
 			filelock_acquire();
-			result = temp_remove((const char* )argv0);
+			result = remove((const char* )argv0);
 			filelock_release();
 			if(result == -1){
 				exit(-1);
@@ -174,8 +171,8 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_CLOSE:
   		argv0 = *p_argv(if_esp+4);
-
 			close((int)argv0);
+			break;
 
   	default:
   		break;
@@ -206,7 +203,6 @@ exit (int status){
   struct thread* t = thread_current();
   t->exit_status = status;
 	printf("%s: exit(%d)\n", thread_name(), status);
-
 	int i; 
   filelock_acquire();
   for (i = 3; i < 131; i++) {
@@ -215,10 +211,8 @@ exit (int status){
         t->fdt[i] = NULL;
       }  
   }   
-  
 	filelock_release();
   thread_exit ();
- 
 } 
 
 pid_t 
@@ -243,10 +237,9 @@ int create (const char *file, unsigned initial_size){
     return 0;
 
 	return filesys_create(file, initial_size);
-  
 }
 
-int temp_remove (const char *file){
+int remove (const char *file){
   if (!string_validate(file) || strlen(file)>14){
     return -1;
   }
@@ -275,7 +268,6 @@ int open (const char *file){
 
 int filesize (int fd){
   if (!fd_validate(fd)){
-    // filelock_release();
     return -1;
   }
 	return file_length(thread_current()->fdt[fd]);
@@ -349,13 +341,9 @@ int write (int fd, const void *buffer, unsigned size){
     filelock_release();
     return size;  
 	}
-	// else
+
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
-  // if (f->deny_write == true){
-  //   filelock_release();
-  //   return 0;
-  // }
 	cnt = file_write(f, buffer, size);	
 	filelock_release();
 	return cnt;
@@ -386,26 +374,6 @@ void close (int fd){
 	t->fdt[fd] = NULL;
 	file_close(f);
   filelock_release();
-  
-}
-
-/* 	Reads a byte at user virtual address UADDR.  
-		Returns the byte value if successful, -1 if a segfault occurred. 	*/
-static int get_user (const uint8_t *uaddr) {
-	int result; 
-	//UADDR must be below PHYS_BASE.
-	if (!is_user_vaddr((const void *)uaddr))
-		return false;
-	asm ("movl $1f, %0; movzbl %1, %0; 1:" : "=&a" (result) : "m" (*uaddr));
-	return result; 
-}
-
-/* 	Writes BYTE to user address UDST. 
-		Returns true if successful, false if a segfault occurred. 		*/
-static bool put_user (uint8_t *udst, uint8_t byte) {
-	int error_code; 	
-	asm ("movl $1f, %0; movb %b2, %1; 1:" : "=&a" (error_code), "=m" (*udst) : "q" (byte));
-	return error_code != -1;
 }
 
 bool
@@ -418,7 +386,6 @@ fd_validate(int fd){
 	return val;
 }
 
-//bad ptr condition? hyunjin
 bool
 string_validate(const char* ptr){
 	if (!is_user_vaddr(ptr))
