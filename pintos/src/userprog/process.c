@@ -29,8 +29,9 @@ static bool load (const char *cmdline, void (**eip) (void), void **esp);
    before process_execute() returns.  Returns the new process's
    thread id, or TID_ERROR if the thread cannot be created. */
 
+/* Search the specific child */
 static struct thread*
-search_child (struct thread* th, tid_t tid){
+search_child (tid_t tid){
   struct list_elem* e;
   struct thread* th_child;
   if(!list_empty(&thread_current()->list_children)){
@@ -49,7 +50,6 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   tid_t tid;
-
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
@@ -71,23 +71,14 @@ process_execute (const char *file_name)
     palloc_free_page (fn_copy);
     return -1;
   }
-  struct thread* th_child = search_child(thread_current, tid);
+  struct thread* th_child = search_child(tid);
   if(th_child == NULL){
     return -1;
   }
   else if(!(th_child->is_loaded)){
     return -1;
   }
-  // struct list_elem* e;
-  // struct thread* th_child_list;
-  // if(!list_empty(&thread_current()->list_children)){
-  //   for(e=list_begin(&thread_current()->list_children); e!=list_end(&thread_current()->list_children); e = list_next(e)){
-  //     th_child_list = list_entry(e, struct thread, elem_list_children);
-  //     if(th_child_list->is_loaded == false){
-  //       return process_wait(tid);
-  //     }
-  //   }
-  // }
+
   /* if success, wait until child ends */
   return tid;
 }
@@ -97,11 +88,10 @@ process_execute (const char *file_name)
 static void
 start_process (void *f_name)
 {
-  // printf("start process, filename %s\n", f_name);
   char *file_name = f_name;
   struct intr_frame if_;
   bool success;
-  tid_t tid = thread_current()->tid;
+
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
@@ -144,19 +134,18 @@ start_process (void *f_name)
 int
 process_wait (tid_t child_tid) 
 {
-  // printf("process_wait for tid %d\n", child_tid);
   if(child_tid == TID_ERROR) return -1;
 
   struct thread* th_child;
   int status;
-  th_child = search_child(thread_current(), child_tid);
+  th_child = search_child(child_tid);
   if(th_child == NULL) return -1;
 
-  if(th_child->is_exited == false) sema_down(&thread_current()->sema_wait);
-
+  sema_down(&th_child->sema_wait);
+  th_child = search_child(child_tid);
   list_remove(&th_child->elem_list_children);
   status = th_child->exit_status;
-  sema_up(&thread_current()->sema_exited);
+  sema_up(&th_child->sema_exited);
   return status;
 }
 
@@ -168,9 +157,9 @@ process_exit (void)
   uint32_t *pd;
 
   curr->is_exited = true;
-  sema_up(&curr->th_parent->sema_wait);
+  sema_up(&curr->sema_wait);
   /* wait until parent removes the child in the list */
-  sema_down(&curr->th_parent->sema_exited);
+  sema_down(&curr->sema_exited);
 
   /* Destroy the current process's page directory and switch back
     to the kernel-only page directory. */
@@ -300,7 +289,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   /* Implemenation Start */
   int argc = 0;
   void* argv[ARGV_MAX_SIZE];
-  memset(argv, NULL, sizeof(argv));
+  memset(argv, 0, sizeof(argv));
 
   char* arg;
   char* saveptr;
@@ -319,7 +308,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   file = filesys_open (argv[0]);
   if (file == NULL) 
     {
-      printf ("load: %s: open failed\n", argv[0]);
+      printf ("load: %s: open failed\n", (char *)argv[0]);
       goto done; 
     }
 
@@ -332,7 +321,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       || ehdr.e_phentsize != sizeof (struct Elf32_Phdr)
       || ehdr.e_phnum > 1024) 
     {
-      printf ("load: %s: error loading executable\n", argv[0]);
+      printf ("load: %s: error loading executable\n", (char *)argv[0]);
       goto done; 
     }
 
@@ -404,7 +393,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
   *eip = (void (*) (void)) ehdr.e_entry;
 
   success = true;
-  /* file_deny_write? kys3 */
 
  done:
   /* We arrive here whether the load is successful or not. */
@@ -414,7 +402,6 @@ load (const char *file_name, void (**eip) (void), void **esp)
 }
 
 /* load() helpers. */
-
 static bool install_page (void *upage, void *kpage, bool writable);
 
 /* Checks whether PHDR describes a valid, loadable segment in
